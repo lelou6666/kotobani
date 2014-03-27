@@ -12,19 +12,22 @@ const _sizeY = 6
 var grid = []
 var tile = preload("res://Tile.scn")
 var DEBUG = ["a","b","c"]
-var stats = load("res://stats.json")
 
 func _ready():
 	# Initalization here
 	var sX = _startX;
 	var sY = _startY;
 	grid.resize(_sizeX*_sizeY)
+	var stats = load("res://dicts/de_DE/stats.csv")
+	var dicts = load("res://dicts/de_DE/references.csv")
+
 #	var lbl = Button.new()
 #	add_child( lbl)
 #	lbl.set_pos(Vector2(300, 300))
 #	lbl.set_size(Vector2(100,100))
 #	lbl.set_text("HALLLLOOOOOOO")
 	var dbg = 0
+	print("stats : "+stats)
 	for i in range(_sizeY):
 		for s in range (_sizeX):
 			var dup = tile.instance()
