@@ -10,6 +10,7 @@ import(
 	"bufio"
 )
 
+
 type Ref struct {
 	key string
 	fname string
@@ -30,6 +31,8 @@ func toUtf8(iso8859_1_buf []byte) string {
 }
 
 func main() {
+	validVocals := "AEIUOYÜÖÄ" 
+
 	f, err := os.Open("de_DE.dict")
 	check(err)
 	defer f.Close()
@@ -49,7 +52,13 @@ func main() {
 			break;
 		} 
 		s = strings.ToUpper(s)
-		switch len(s) {
+		
+		// remove accronymes
+		if ! strings.ContainsAny(s, validVocals) {
+			continue
+		}
+		
+		switch len([]rune(s)) {
 		case 2:
 			continue
 		case 3:

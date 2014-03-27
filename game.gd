@@ -12,6 +12,7 @@ const _sizeY = 6
 var grid = []
 var tile = preload("res://Tile.scn")
 var DEBUG = ["a","b","c"]
+var stats = load("res://stats.json")
 
 func _ready():
 	# Initalization here
@@ -33,7 +34,7 @@ func _ready():
 			dbg += 1
 			dbg %= 3
 			var params = [dup.get_text(), i, s]
-			print("Connecting with : "+params[0]8)
+			print("Connecting with : "+params[0])
 			dup.connect("pressed", self, "_on_tile_pressed", params)
 			grid[(i*_sizeX+s)]=dup
 			sX += 100;

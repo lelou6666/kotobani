@@ -30,7 +30,7 @@ func main() {
 	defer f.Close()
 
 	//b := make([]run, 1)	
-	cnt := make(map[string] int)
+	cnt := make(map[rune] int)
 	sum := 0
 	reader := bufio.NewReader(f)
 	for {
@@ -41,7 +41,7 @@ func main() {
 		if string(r) == "\n" {
 			continue
 		}
-		r_s := strings.ToUpper(string(r))
+		r_s := rune(strings.ToUpper(string(r)))
 		_,prs := cnt[r_s]
 		if !prs {
 			cnt[r_s] = 1
@@ -53,7 +53,7 @@ func main() {
 			fmt.Println( sum)
 		}
 	}
-	out := make(map[string] float64)
+	out := make(map[rune] float64)
 
 	div := float64(100.0/float64(sum))
 
