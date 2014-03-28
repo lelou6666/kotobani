@@ -10,7 +10,6 @@ import(
 	"bufio"
 )
 
-
 type Ref struct {
 	key string
 	fname string
@@ -31,6 +30,8 @@ func toUtf8(iso8859_1_buf []byte) string {
 }
 
 func main() {
+	PATH := "../dicts/de_DE/"
+
 	validVocals := "AEIUOYÜÖÄ" 
 
 	f, err := os.Open("de_DE.dict")
@@ -91,9 +92,9 @@ func main() {
 			} else {			
 				if currentWords != "" {
 					fmt.Println("Saving "+currentPrefix,"(",sum," words, fname : ",fileCount,")")
-					err = ioutil.WriteFile("./dicts/"+strconv.Itoa(fileCount), []byte(currentWords), 0644)
+					err = ioutil.WriteFile(PATH+strconv.Itoa(fileCount), []byte(currentWords), 0644)
 					if err != nil {
-						fmt.Println("error writing "+"./dicts/"+strconv.Itoa(fileCount), err)
+						fmt.Println("error writing "+PATH+strconv.Itoa(fileCount), err)
 					} else {
 						references[fileCount]=Ref{currentPrefix, strconv.Itoa(fileCount)}
 						fileCount ++
@@ -107,33 +108,43 @@ func main() {
 		}
 	}
 	fmt.Println("Saving small words (",smallSum," words, fname : ",fileCount,")")
-	err = ioutil.WriteFile("./dicts/"+strconv.Itoa(fileCount), []byte(smallWords), 0644)
+	err = ioutil.WriteFile(PATH+strconv.Itoa(fileCount), []byte(smallWords), 0644)
 	if err != nil {
-		fmt.Println("error writing ./dicts/"+strconv.Itoa(fileCount), err)
+		fmt.Println("error writing "+PATH+strconv.Itoa(fileCount), err)
 	}
 	references[fileCount]=Ref{"OTHERS", strconv.Itoa(fileCount)}
-
 	fmt.Println("Saving references ...")
 
-	refCSV := ""
+	refGD := ""
 	for _,r := range(references) {
-		refCSV = refCSV+r.key+","+r.fname+"\n"
+		if refGD != "" {
+			refGD +=","
+		}
+		refGD = refGD+"\""+r.key+"\":\""+r.fname+"\""
 	}
 
-	err = ioutil.WriteFile("./dicts/references.csv", []byte(refCSV), 0644)
+	refGD = "var dictRefs =  {"+refGD+"}\n"
+
+	err = ioutil.WriteFile(PATH+"references.gd", []byte(refGD), 0644)
 	if err != nil {
-		fmt.Println("error writing ./dicts/references.txt", err)
+		fmt.Println("error writing "+PATH+"references.gd", err)
 	}
 
-	statsCSV := ""
+	statsGD := ""
 	cntCurrent := 0
 	for r,c := range(rawStats) {
 		if c < 50 {
 			continue
-		}
+		}	
+		c = c/100
 		cntCurrent += c
-		statsCSV = statsCSV+string(r)+","+strconv.Itoa(cntCurrent)+"\n"
+		if statsGD != "" {
+			statsGD += ","
+		}
+		statsGD = statsGD+strconv.Itoa(cntCurrent)+":\""+string(r)+"\""
 	}	
+	statsGD = "var dictStats = {"+statsGD+"}\n"
+	statsGD = statsGD+"var maxRuneProbability = "+strconv.Itoa(cntCurrent)
 
 /*
 // using percents is nice and fun but it involves plenty of 
@@ -166,9 +177,9 @@ func main() {
 */	
 
 
-	err = ioutil.WriteFile("./dicts/stats.csv", []byte(statsCSV), 0644)
+	err = ioutil.WriteFile(PATH+"stats.gd", []byte(statsGD), 0644)
 	if err != nil {
-		fmt.Println("error writing ./dicts/stats.csv", err)
+		fmt.Println("error writing "+PATH+"stats.gd", err)
 	}
 
 	fmt.Println("done")
