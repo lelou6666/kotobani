@@ -20,6 +20,7 @@ var selectedTiles = []
 var lastTile = [-1,-1]
 var createdWord = ""
 var selectedTileCnt = 0
+var score = 0
 
 func _ready():
 	randomize()
@@ -66,6 +67,8 @@ func notInSelected(x, y):
 			return false
 	return true
 
+func sortLowestFirst():
+
 func clearSelected():
 	print("Entering clearSelected")
 	for i in range(0,selectedTileCnt):
@@ -74,7 +77,7 @@ func clearSelected():
 		selectedTiles[i] = [-1,-1,null]
 	selectedTileCnt=0
 	print("done")
-		
+	
 func _on_tile_pressed(btn, txt, x, y):
 	if ((lastTile[0] == -1) || (lastTile[1] == -1)) || (x<=(lastTile[0]+1)) && (x>=(lastTile[0]-1)) && (y<=(lastTile[1]+1)) && (y>=(lastTile[1]-1)) && ((lastTile[0] != x) || (lastTile[1] != y)) && (notInSelected(x,y)):
 		lastTile = [x,y]
@@ -82,11 +85,15 @@ func _on_tile_pressed(btn, txt, x, y):
 		selectedTileCnt += 1
 		createdWord = createdWord + txt
 	elif (lastTile[0] == x) && (lastTile[1] == y):
+		var wordExists = checkWord(createdWord)
 		print("Word : ",createdWord)
-		print("Exists : ",checkWord(createdWord))
-		createdWord = ""
-		lastTile = [-1,-1]
-		clearSelected()
+		print("Exists : ", wordExists)
+		if wordExists:
+			destroyAndFall()
+			score += createdWord.length()
+			createdWord = ""
+			lastTile = [-1,-1]
+			clearSelected()
 	else:
 		clearSelected()
 		print("CLEARED")
@@ -94,7 +101,15 @@ func _on_tile_pressed(btn, txt, x, y):
 		selectedTiles[selectedTileCnt]=[x,y,btn]
 		selectedTileCnt += 1
 		createdWord = txt
-	
+
+func destroyAndFall():
+	for i in range(0,selectedTileCnt):
+		# starting with the lowest button(!) move each button above selected buttons up the size of a button, and swap the text
+		# with the button above it. the highest of any column gets a new text. 
+		# move all buttons downward until they are back to their actual place
+		selectedTiles[i][2].set_text("")
+		print("debug. too tired")
+				
 func checkWord(w):
 	if w.length() < 3:
 		return false
@@ -108,4 +123,8 @@ func checkWord(w):
 	var search = "\n"+w+"\n"
 	if w.length() == 3:
 		search = w+"\n" 
-	return cnt.find(search,0)
+	var rs = cnt.find(search,0)
+	if rs > -1:
+		return true
+	else:
+		return false
