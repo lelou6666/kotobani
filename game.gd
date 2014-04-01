@@ -28,16 +28,9 @@ func _ready():
 	var sY = _startY
 	grid.resize(_sizeX*_sizeY)
 	selectedTiles.resize(_sizeX*_sizeY)
-	for i in range(0, _sizeX*_sizeY):
+	for i in range(_sizeX*_sizeY):
 		selectedTiles[i] = [-1,-1,null]
-
 	print("maxRuneProbability : ",stats.maxRuneProbability)
-
-#	var lbl = Button.new()
-#	add_child( lbl)
-#	lbl.set_pos(Vector2(300, 300))
-#	lbl.set_size(Vector2(100,100))
-#	lbl.set_text("HALLLLOOOOOOO")
 	for i in range(_sizeY):
 		for s in range (_sizeX):
 			var dup = tile.instance()
@@ -45,7 +38,7 @@ func _ready():
 			add_child(dup)
 			dup.set_pos(Vector2(sX,sY))
 			dup.set_text(rune)
-			var params = [dup,dup.get_text(), i, s]
+			var params = [dup,dup.get_text(), s, i]
 			dup.connect("pressed", self, "_on_tile_pressed", params)
 			grid[(i*_sizeX+s)]=dup
 			sX += 100
@@ -66,8 +59,6 @@ func notInSelected(x, y):
 		if (st[0] == x) && (st[1] == y):
 			return false
 	return true
-
-func sortLowestFirst():
 
 func clearSelected():
 	print("Entering clearSelected")
@@ -90,26 +81,49 @@ func _on_tile_pressed(btn, txt, x, y):
 		print("Exists : ", wordExists)
 		if wordExists:
 			destroyAndFall()
-			score += createdWord.length()
+			score += selectedTileCnt
 			createdWord = ""
 			lastTile = [-1,-1]
 			clearSelected()
+			selectedTileCnt = 0
 	else:
 		clearSelected()
 		print("CLEARED")
 		lastTile = [x,y]
 		selectedTiles[selectedTileCnt]=[x,y,btn]
-		selectedTileCnt += 1
+		selectedTileCnt = 1
 		createdWord = txt
 
 func destroyAndFall():
+	print("ENTERING")
+	var lowestOrderedPerX = {}
+	var firstOrder = -1
 	for i in range(0,selectedTileCnt):
 		# starting with the lowest button(!) move each button above selected buttons up the size of a button, and swap the text
 		# with the button above it. the highest of any column gets a new text. 
 		# move all buttons downward until they are back to their actual place
-		selectedTiles[i][2].set_text("")
-		print("debug. too tired")
-				
+		var x = selectedTiles[i][0]
+		print("x:",x,"  T:",selectedTiles[i][2].get_text())
+		selectedTiles[i][2].set_text("")		
+		if ! lowestOrderedPerX.has(x):
+			lowestOrderedPerX[x] = {500:selectedTiles[i]}
+		else :
+			var y =selectedTiles[i][1]
+			var tmpOrder = 1000
+			print("got the key",x)
+			for k in lowestOrderedPerX[x].keys().sort():
+				if y < lowestOrderedPerX[x][k][1]:
+					tmpOrder = k - 50
+				elif y == lowestOrderedPerX[x][k][1]:
+					tmpOrder = k - 1
+					break
+				else:
+					tmpOrder = k+50
+			lowestOrderedPerX[x][tmpOrder] = selectedTiles[i]
+	print("----->")
+	print(lowestOrderedPerX)
+	print("<-----")
+	
 func checkWord(w):
 	if w.length() < 3:
 		return false
