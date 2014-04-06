@@ -8,6 +8,7 @@ const _startX = 224
 const _startY = 0
 const _sizeX = 8
 const _sizeY = 6
+const _HIGHEST = 999999
 
 var grid = []
 var tile = preload("res://tile.scn")
@@ -21,13 +22,21 @@ var lastTile = [-1,-1]
 var createdWord = ""
 var selectedTileCnt = 0
 var score = 0
+var scoreNode = null
+
+var lowestOrderedPerX = []
 
 func _ready():
 	randomize()
 	var sX = _startX
 	var sY = _startY
+	scoreNode = get_node("scoreDisplay")
 	grid.resize(_sizeX*_sizeY)
 	selectedTiles.resize(_sizeX*_sizeY)
+	lowestOrderedPerX.resize(_sizeX)
+	for i in range(0,_sizeX):
+		lowestOrderedPerX[i] = {}
+		
 	for i in range(_sizeX*_sizeY):
 		selectedTiles[i] = [-1,-1,null]
 	print("maxRuneProbability : ",stats.maxRuneProbability)
@@ -38,7 +47,7 @@ func _ready():
 			add_child(dup)
 			dup.set_pos(Vector2(sX,sY))
 			dup.set_text(rune)
-			var params = [dup,dup.get_text(), s, i]
+			var params = [dup, s, i]
 			dup.connect("pressed", self, "_on_tile_pressed", params)
 			grid[(i*_sizeX+s)]=dup
 			sX += 100
@@ -69,7 +78,8 @@ func clearSelected():
 	selectedTileCnt=0
 	print("done")
 	
-func _on_tile_pressed(btn, txt, x, y):
+func _on_tile_pressed(btn, x, y):
+	var txt = btn.get_text()
 	if ((lastTile[0] == -1) || (lastTile[1] == -1)) || (x<=(lastTile[0]+1)) && (x>=(lastTile[0]-1)) && (y<=(lastTile[1]+1)) && (y>=(lastTile[1]-1)) && ((lastTile[0] != x) || (lastTile[1] != y)) && (notInSelected(x,y)):
 		lastTile = [x,y]
 		selectedTiles[selectedTileCnt]=[x,y,btn]
@@ -82,6 +92,7 @@ func _on_tile_pressed(btn, txt, x, y):
 		if wordExists:
 			destroyAndFall()
 			score += selectedTileCnt
+			scoreNode.set_text(str(score))
 			createdWord = ""
 			lastTile = [-1,-1]
 			clearSelected()
@@ -95,23 +106,20 @@ func _on_tile_pressed(btn, txt, x, y):
 		createdWord = txt
 
 func destroyAndFall():
-	print("ENTERING")
-	var lowestOrderedPerX = {}
-	var firstOrder = -1
+	# DESTROY
 	for i in range(0,selectedTileCnt):
-		# starting with the lowest button(!) move each button above selected buttons up the size of a button, and swap the text
-		# with the button above it. the highest of any column gets a new text. 
-		# move all buttons downward until they are back to their actual place
 		var x = selectedTiles[i][0]
-		print("x:",x,"  T:",selectedTiles[i][2].get_text())
-		selectedTiles[i][2].set_text("")		
-		if ! lowestOrderedPerX.has(x):
-			lowestOrderedPerX[x] = {500:selectedTiles[i]}
-		else :
-			var y =selectedTiles[i][1]
+		selectedTiles[i][2].set_text("")
+		var y =selectedTiles[i][1]
+		var keys = lowestOrderedPerX[x].keys()
+		var highest = -1
+		if ! keys.empty():
 			var tmpOrder = 1000
-			print("got the key",x)
-			for k in lowestOrderedPerX[x].keys().sort():
+			highest = lowestOrderedPerX[x][_HIGHEST]
+			keys.sort()
+			for k in keys:
+				if k == _HIGHEST:
+					continue
 				if y < lowestOrderedPerX[x][k][1]:
 					tmpOrder = k - 50
 				elif y == lowestOrderedPerX[x][k][1]:
@@ -120,9 +128,44 @@ func destroyAndFall():
 				else:
 					tmpOrder = k+50
 			lowestOrderedPerX[x][tmpOrder] = selectedTiles[i]
-	print("----->")
-	print(lowestOrderedPerX)
-	print("<-----")
+		else:
+			lowestOrderedPerX[x][500]=selectedTiles[i]
+		if y > highest:
+			lowestOrderedPerX[x][_HIGHEST] = y
+	# FALL
+	var c = ""
+	var rrange = []
+	for x in range(0,_sizeX):
+		print("x:",x)
+		print("lowestOrdered:",lowestOrderedPerX[x])
+		if lowestOrderedPerX[x].empty():
+			print("empty")
+			continue
+		c = ""
+		print("Highest Y:",lowestOrderedPerX[x][_HIGHEST])
+		var rng = range(0,lowestOrderedPerX[x][_HIGHEST]+1)
+		rng.invert()
+		for y in rng:
+			print("y:",y)
+			c = rcsvGetLetterAbove(x,y)
+			if c == "":
+				c = chooseRune()
+			grid[y*_sizeX+x].set_text(c)
+			
+		 
+		
+func rcsvGetLetterAbove(x,y):
+	var idx = y*_sizeX+x
+	var cnt = grid[idx].get_text()
+	if cnt != "":
+		grid[idx].set_text("")
+		return cnt
+	else:
+		y = y -1
+		if y < 0:
+			return ""
+		else:
+			return rcsvGetLetterAbove(x,y)
 	
 func checkWord(w):
 	if w.length() < 3:
