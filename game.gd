@@ -1,5 +1,6 @@
-
 extends Node2D
+
+const _VERSION = "alpha_3"
 
 # member variables here, example:
 # var a=2
@@ -11,11 +12,10 @@ const _sizeY = 6
 const _HIGHEST = 999999
 
 var grid = []
-var tile = preload("res://tile.scn")
-var arrows = preload("res://arrows.scn")
+var stars = []
 
-var stats = preload("res://dicts/de_DE/stats.gd").new()
-var refs = preload("res://dicts/de_DE/references.gd").new()
+var tile = preload("res://tile.scn")
+var starsPrtcl = preload("res://particles_rainbow.scn")
 
 var selectedTiles = []
 var lastTile = [-1,-1]
@@ -23,15 +23,56 @@ var createdWord = ""
 var selectedTileCnt = 0
 var score = 0
 var scoreNode = null
+var sfxNode = null
+var lgWdNode = null
+var crtWdNode = null
+var lstWdNode = null
+var soundToggle = 1
+var musicToggle = 1
+var level = 0
+var longestWord = ""
 
 var lowestOrderedPerX = []
 
+var language = null
+
+var stats = null
+var refs = null
+
+func _input(e):
+	if e.is_action("clear_selected"):
+		createdWord = ""
+		lastTile = [-1,-1]
+		clearSelected()
+		selectedTileCnt = 0
+		return
+	if e.is_action("toggle_sound"):
+		soundToggle = soundToggle ^ 1
+		return
+	if e.is_action("toggle_music"): 
+		musicToggle = musicToggle ^ 1
+		if musicToggle == 1:
+			get_node("streamNode").play()
+		else:
+			get_node("streamNode").stop()
+		return
+
 func _ready():
 	randomize()
+
+	language = load("res://language.gd").new()
+	stats = load("res://dicts/"+language.locale+"/stats.gd").new()
+	refs = load("res://dicts/"+language.locale+"/references.gd").new()
+
 	var sX = _startX
 	var sY = _startY
 	scoreNode = get_node("scoreDisplay")
+	sfxNode = get_node("sfxNode")
+	lgWdNode = get_node("longuestWord")
+	crtWdNode = get_node("currentWord")
+	lstWdNode = get_node("lastWord")
 	grid.resize(_sizeX*_sizeY)
+	stars.resize(_sizeX*_sizeY)
 	selectedTiles.resize(_sizeX*_sizeY)
 	lowestOrderedPerX.resize(_sizeX)
 	for i in range(0,_sizeX):
@@ -50,9 +91,15 @@ func _ready():
 			var params = [dup, s, i]
 			dup.connect("pressed", self, "_on_tile_pressed", params)
 			grid[(i*_sizeX+s)]=dup
+
+			dup = starsPrtcl.instance()
+			add_child(dup)
+			dup.set_pos(Vector2(sX+50,sY+50))
+			stars[(i*_sizeX+s)]=dup
 			sX += 100
 		sX = _startX
 		sY += 100
+	set_process_input(true)
 		
 func chooseRune():
 	var runeSelector = rand_range(0, stats.maxRuneProbability)
@@ -82,17 +129,29 @@ func _on_tile_pressed(btn, x, y):
 	var txt = btn.get_text()
 	if ((lastTile[0] == -1) || (lastTile[1] == -1)) || (x<=(lastTile[0]+1)) && (x>=(lastTile[0]-1)) && (y<=(lastTile[1]+1)) && (y>=(lastTile[1]-1)) && ((lastTile[0] != x) || (lastTile[1] != y)) && (notInSelected(x,y)):
 		lastTile = [x,y]
+		btn.set_pressed(true)
 		selectedTiles[selectedTileCnt]=[x,y,btn]
 		selectedTileCnt += 1
 		createdWord = createdWord + txt
+		crtWdNode.set_text(createdWord)
 	elif (lastTile[0] == x) && (lastTile[1] == y):
+		btn.set_pressed(true)
 		var wordExists = checkWord(createdWord)
 		print("Word : ",createdWord)
 		print("Exists : ", wordExists)
 		if wordExists:
-			destroyAndFall()
-			score += selectedTileCnt
+			if soundToggle == 1:
+				sfxNode.play("wordfound", false)
+			lstWdNode.set_text(createdWord)
+			var mult = ((createdWord.length()-3)*10)
+			if mult == 0:
+				mult = 1				
+			score += selectedTileCnt*mult
 			scoreNode.set_text(str(score))
+			if createdWord.length() > longestWord.length():
+				longestWord = createdWord
+				lgWdNode.set_text(longestWord)
+			destroyAndFall()
 			createdWord = ""
 			lastTile = [-1,-1]
 			clearSelected()
@@ -104,13 +163,15 @@ func _on_tile_pressed(btn, x, y):
 		selectedTiles[selectedTileCnt]=[x,y,btn]
 		selectedTileCnt = 1
 		createdWord = txt
-
+		
 func destroyAndFall():
 	# DESTROY
 	for i in range(0,selectedTileCnt):
 		var x = selectedTiles[i][0]
-		selectedTiles[i][2].set_text("")
 		var y =selectedTiles[i][1]
+		selectedTiles[i][2].set_text("")
+		stars[y*_sizeX+x].set_emitting(true)
+
 		var keys = lowestOrderedPerX[x].keys()
 		var highest = -1
 		if ! keys.empty():
@@ -136,17 +197,12 @@ func destroyAndFall():
 	var c = ""
 	var rrange = []
 	for x in range(0,_sizeX):
-		print("x:",x)
-		print("lowestOrdered:",lowestOrderedPerX[x])
 		if lowestOrderedPerX[x].empty():
-			print("empty")
 			continue
 		c = ""
-		print("Highest Y:",lowestOrderedPerX[x][_HIGHEST])
 		var rng = range(0,lowestOrderedPerX[x][_HIGHEST]+1)
 		rng.invert()
 		for y in rng:
-			print("y:",y)
 			c = rcsvGetLetterAbove(x,y)
 			if c == "":
 				c = chooseRune()
@@ -174,13 +230,12 @@ func checkWord(w):
 	if ! refs.dictRefs.has(prefix):
 		return false
 	var fh = File.new()
-	fh.open("res://dicts/de_DE/"+refs.dictRefs[prefix], 1)
+	fh.open("res://dicts/"+language.locale+"/"+refs.dictRefs[prefix], 1)
 	var cnt = fh.get_as_text()
 	fh.close()
-	var search = "\n"+w+"\n"
-	if w.length() == 3:
-		search = w+"\n" 
-	var rs = cnt.find(search,0)
+	var rs = cnt.find("\n"+w+"\n",0)
+	if rs == -1:
+		rs = cnt.find(w+"\n",0)
 	if rs > -1:
 		return true
 	else:
