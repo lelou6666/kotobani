@@ -15,7 +15,7 @@ func check(e error) {
 }
 
 func isAlpha(b byte) bool  {
-	if ((b >= 'A') && (b <='Z')) || ((b >='a') && (b <= 'z')) || ((b >= 160) && (b <= 255)) {
+	if ((b >= 'A') && (b <='Z')) || ((b >='a') && (b <= 'z')) {
 		return true
 	} 
 	return false
@@ -40,11 +40,14 @@ func main() {
 		case ! isAlpha(b) :
 			if (! inWord) || (inExtra) {
 				inExtra = false
+			} else if b=='@' {
+				inExtra = true
+				inWord = false
 			} else if inWord {
 				inWord = false
 				inExtra = true
 				out = out+"\n"
-			} 
+			}
 		case isAlpha(b):
 			if (inWord) || ((!inWord) && (!inExtra)) {
 				out = out + string(b)

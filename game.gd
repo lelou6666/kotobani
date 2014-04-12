@@ -1,6 +1,6 @@
 extends Node2D
 
-const _VERSION = "alpha_3"
+const _VERSION = "alpha_5"
 
 # member variables here, example:
 # var a=2
@@ -27,6 +27,7 @@ var sfxNode = null
 var lgWdNode = null
 var crtWdNode = null
 var lstWdNode = null
+
 var soundToggle = 1
 var musicToggle = 1
 var level = 0
@@ -63,9 +64,17 @@ func _ready():
 	language = load("res://language.gd").new()
 	stats = load("res://dicts/"+language.locale+"/stats.gd").new()
 	refs = load("res://dicts/"+language.locale+"/references.gd").new()
-
+	get_node("version").set_text(_VERSION)
+	print("locale :",language.locale)
+	TranslationServer.set_locale(language.locale)
+	
+	
 	var sX = _startX
 	var sY = _startY
+	get_node("lastword-label").set_text(TranslationServer.translate("LASTWORD")+" :")
+	get_node("longest-label").set_text(TranslationServer.translate("LONGWORD")+" :")
+	get_node("buffer-label").set_text(TranslationServer.translate("BUFFER")+" :")
+	get_node("score-label").set_text(TranslationServer.translate("SCORE")+" :")
 	scoreNode = get_node("scoreDisplay")
 	sfxNode = get_node("sfxNode")
 	lgWdNode = get_node("longuestWord")

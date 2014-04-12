@@ -1,0 +1,9 @@
+id,en_US,de_DE,fr_FR
+SCORE,score,Punkzahl,points
+BUFFER,selected,ausgewählt,selection
+LASTWORD,last word,letztes Wort,dernier mot
+LONGWORD,longuest word,längstes Wort,mot le plus long
+LEVEL,level,Stufe,niveau
+GIVEUP,give up,aufgeben,abandonner
+HELP,help,Hilfe,aide
+BESTWORD,best word,bestes Wort,meilleur mot

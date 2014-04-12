@@ -1,1 +1,2 @@
-var locale="de_DE"
+var locale="en_US"
+#var locale="de_DE"

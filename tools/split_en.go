@@ -30,25 +30,20 @@ func toUtf8(iso8859_1_buf []byte) string {
 }
 
 func main() {
-	PATH := "../dicts/en_EN/"
+	PATH := "../dicts/en_US/"
 
 	validVocals := "AEIUOY" 
 
-	f, err := os.Open("en_EN.dict")
+	f, err := os.Open("en_US.dict")
 	check(err)
 	defer f.Close()
 	
-	smallWords := ""
-	currentWords := ""
-	currentPrefix := "AAA"
-
-	sum := 0
-	smallSum := 0
 	fileCount := 0
 	reader := bufio.NewReader(f)
 
 	references := make(map[int] Ref)
 	rawStats := make(map[rune] int)
+	files :=make(map[string] string)
 	cntWords := 0.0
 	cntRunes := 0.0
 
@@ -68,8 +63,6 @@ func main() {
 		case 2:
 			continue
 		case 3:
-			smallWords += s
-			smallSum ++
 			continue
 		default:
 			// stats
@@ -87,34 +80,28 @@ func main() {
 				cntRunes ++
 			}			
 			// split
-			if strings.HasPrefix(s,currentPrefix) {
-				currentWords += s
-			} else {			
-				if currentWords != "" {
-					fmt.Println("Saving "+currentPrefix,"(",sum," words, fname : ",fileCount,")")
-					err = ioutil.WriteFile(PATH+strconv.Itoa(fileCount), []byte(currentWords), 0644)
-					if err != nil {
-						fmt.Println("error writing "+PATH+strconv.Itoa(fileCount), err)
-					} else {
-						references[fileCount]=Ref{currentPrefix, strconv.Itoa(fileCount)}
-						fileCount ++
-					}
-				}
-				sum = 0;
-				currentWords = s
-				currentPrefix = string([]rune(s)[0:3])
-			}
-			sum ++
+			pre := string([]rune(s)[0:3]) 
+			files[pre] = files[pre]+strings.Trim(s,"\n\r")+"\n"	
+		}
+		if (int(cntWords)%1000) == 0 {
+			fmt.Println(cntWords,"words. Current : "+s)
 		}
 	}
-	fmt.Println("Saving small words (",smallSum," words, fname : ",fileCount,")")
-	err = ioutil.WriteFile(PATH+strconv.Itoa(fileCount), []byte(smallWords), 0644)
-	if err != nil {
-		fmt.Println("error writing "+PATH+strconv.Itoa(fileCount), err)
-	}
-	references[fileCount]=Ref{"OTHERS", strconv.Itoa(fileCount)}
-	fmt.Println("Saving references ...")
 
+	fmt.Println("total",cntWords,"words")
+
+	fileCount = 0
+	for prefix, words := range(files) {
+		fmt.Println("Saving "+prefix,"(",strings.Count(words,"\n")," words, fname : ",fileCount,")")
+		err = ioutil.WriteFile(PATH+strconv.Itoa(fileCount), []byte(words), 0644)
+		if err != nil {
+			fmt.Println("error writing "+PATH+strconv.Itoa(fileCount), err)
+		} else {
+			references[fileCount]=Ref{prefix, strconv.Itoa(fileCount)}
+			fileCount ++
+		}
+	}
+	fmt.Println("Saving references ...")
 	refGD := ""
 	refRef := ""
 	for _,r := range(references) {
