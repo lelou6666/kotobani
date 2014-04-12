@@ -1,14 +1,16 @@
 extends Node2D
 
-const _VERSION = "alpha_5"
+const _VERSION = "alpha_6b\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nDO NOT REDISTRIBUTE!"
 
 # member variables here, example:
 # var a=2
 # var b="textvar"
 const _startX = 224
 const _startY = 0
-const _sizeX = 8
-const _sizeY = 6
+const _sizeX = 16
+const _sizeY = 12
+const _tileSize = 50
+const _halfTileSize = 25
 const _HIGHEST = 999999
 
 var grid = []
@@ -30,7 +32,8 @@ var lstWdNode = null
 
 var soundToggle = 1
 var musicToggle = 1
-var level = 0
+var level = 1
+var nextLevelAt = 200
 var longestWord = ""
 
 var lowestOrderedPerX = []
@@ -58,6 +61,15 @@ func _input(e):
 			get_node("streamNode").stop()
 		return
 
+func rebuildGrid():
+	for i in range(_sizeX*_sizeY):
+		selectedTiles[i] = [-1,-1,null]
+	for i in range(_sizeY):
+		for s in range (_sizeX):
+			grid[(i*_sizeX+s)].set_text(chooseRune())
+			stars[i*_sizeX+s].set_emitting(true)
+			
+
 func _ready():
 	randomize()
 
@@ -75,11 +87,14 @@ func _ready():
 	get_node("longest-label").set_text(TranslationServer.translate("LONGWORD")+" :")
 	get_node("buffer-label").set_text(TranslationServer.translate("BUFFER")+" :")
 	get_node("score-label").set_text(TranslationServer.translate("SCORE")+" :")
+	get_node("level-label").set_text(TranslationServer.translate("LEVEL")+" :")
+	get_node("levelWord").set_text(str(level))
 	scoreNode = get_node("scoreDisplay")
 	sfxNode = get_node("sfxNode")
 	lgWdNode = get_node("longuestWord")
 	crtWdNode = get_node("currentWord")
 	lstWdNode = get_node("lastWord")
+	get_node("timer").set_text("")
 	grid.resize(_sizeX*_sizeY)
 	stars.resize(_sizeX*_sizeY)
 	selectedTiles.resize(_sizeX*_sizeY)
@@ -100,14 +115,13 @@ func _ready():
 			var params = [dup, s, i]
 			dup.connect("pressed", self, "_on_tile_pressed", params)
 			grid[(i*_sizeX+s)]=dup
-
 			dup = starsPrtcl.instance()
 			add_child(dup)
-			dup.set_pos(Vector2(sX+50,sY+50))
+			dup.set_pos(Vector2(sX+_halfTileSize,sY+_halfTileSize))
 			stars[(i*_sizeX+s)]=dup
-			sX += 100
+			sX += _tileSize
 		sX = _startX
-		sY += 100
+		sY += _tileSize
 	set_process_input(true)
 		
 func chooseRune():
@@ -132,6 +146,10 @@ func clearSelected():
 			selectedTiles[i][2].set_pressed(false)
 		selectedTiles[i] = [-1,-1,null]
 	selectedTileCnt=0
+	createdWord = ""
+	selectedTileCnt = 0
+	lastTile = [-1,-1]
+	crtWdNode.set_text(createdWord)
 	print("done")
 	
 func _on_tile_pressed(btn, x, y):
@@ -161,10 +179,15 @@ func _on_tile_pressed(btn, x, y):
 				longestWord = createdWord
 				lgWdNode.set_text(longestWord)
 			destroyAndFall()
-			createdWord = ""
-			lastTile = [-1,-1]
 			clearSelected()
-			selectedTileCnt = 0
+			if score >= nextLevelAt:
+				level = level + 1
+				nextLevelAt = nextLevelAt+(level * 100)
+				get_node("levelWord").set_text(str(level))
+				sfxNode.play("levelup", false)
+				print("next level at : ",nextLevelAt)
+				rebuildGrid()
+			
 	else:
 		clearSelected()
 		print("CLEARED")
