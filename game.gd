@@ -1,6 +1,7 @@
 extends Node2D
 
-const _VERSION = "alpha_6b\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nDO NOT REDISTRIBUTE!"
+const _VERSION = "alpha_8"
+const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nDO NOT REDISTRIBUTE!"
 
 # member variables here, example:
 # var a=2
@@ -12,7 +13,9 @@ const _sizeY = 12
 const _tileSize = 50
 const _halfTileSize = 25
 const _HIGHEST = 999999
+const _initialTimer = 60*15
 
+var PLAY = false
 var grid = []
 var stars = []
 
@@ -29,11 +32,18 @@ var sfxNode = null
 var lgWdNode = null
 var crtWdNode = null
 var lstWdNode = null
+var progressionBar = null
+
+var gameTimer = null
+var timer = _initialTimer
+var lastTimer = timer
+var timerNode = null
 
 var soundToggle = 1
 var musicToggle = 1
 var level = 1
 var nextLevelAt = 200
+var oldLevelAt = 0
 var longestWord = ""
 
 var lowestOrderedPerX = []
@@ -45,6 +55,8 @@ var refs = null
 
 func _input(e):
 	if e.is_action("clear_selected"):
+		if PLAY != true:
+			return
 		createdWord = ""
 		lastTile = [-1,-1]
 		clearSelected()
@@ -62,6 +74,8 @@ func _input(e):
 		return
 
 func rebuildGrid():
+	if PLAY != true:
+		return
 	for i in range(_sizeX*_sizeY):
 		selectedTiles[i] = [-1,-1,null]
 	for i in range(_sizeY):
@@ -70,17 +84,48 @@ func rebuildGrid():
 			stars[i*_sizeX+s].set_emitting(true)
 			
 
+func gameOver():
+	if PLAY != true:
+		return
+	gameTimer.stop()
+	PLAY = false
+	get_node("streamNode").stop()
+	get_node("streamNode").set_stream("gameover")
+	get_node("streamTitle").stop()
+	get_node("streamGameOn").stop()
+	get_node("streamGameOver").play()
+	print("****** GAME OVER MAN! GAME OVER! ******")
+
+func _time_out():
+	if PLAY != true:
+		return
+	timer = timer - 1
+	var seconds = int(timer) % 60
+	var minutes = int(floor(timer/60))
+	timerNode.set_text(str(minutes)+":"+str(seconds).pad_zeros(2))
+	if timer < 0:
+		gameTimer.stop()
+		gameOver()
+
 func _ready():
 	randomize()
 
 	language = load("res://language.gd").new()
 	stats = load("res://dicts/"+language.locale+"/stats.gd").new()
 	refs = load("res://dicts/"+language.locale+"/references.gd").new()
-	get_node("version").set_text(_VERSION)
+	get_node("version").set_text(_VERSION+_COPYRIGHT)
 	print("locale :",language.locale)
 	TranslationServer.set_locale(language.locale)
+	get_node("titlescreen/Grid/playBtn").connect("pressed", self, "play")
+	get_node("streamTitle").play()
+	get_node("streamGameOver").stop()
+	get_node("streamGameOn").stop()
 	
-	
+func play():
+	if PLAY == true:
+		return
+	get_node("titlescreen").set_pos(Vector2(-10000,-10000))
+	PLAY = true
 	var sX = _startX
 	var sY = _startY
 	get_node("lastword-label").set_text(TranslationServer.translate("LASTWORD")+" :")
@@ -89,12 +134,18 @@ func _ready():
 	get_node("score-label").set_text(TranslationServer.translate("SCORE")+" :")
 	get_node("level-label").set_text(TranslationServer.translate("LEVEL")+" :")
 	get_node("levelWord").set_text(str(level))
+
 	scoreNode = get_node("scoreDisplay")
 	sfxNode = get_node("sfxNode")
 	lgWdNode = get_node("longuestWord")
 	crtWdNode = get_node("currentWord")
 	lstWdNode = get_node("lastWord")
-	get_node("timer").set_text("")
+	timerNode = get_node("timer")
+	progressionBar = get_node("progressionBar")
+	gameTimer=get_node("gameTimer")
+	gameTimer.connect("timeout", self, "_time_out")
+	gameTimer.start()
+	
 	grid.resize(_sizeX*_sizeY)
 	stars.resize(_sizeX*_sizeY)
 	selectedTiles.resize(_sizeX*_sizeY)
@@ -123,8 +174,13 @@ func _ready():
 		sX = _startX
 		sY += _tileSize
 	set_process_input(true)
+	get_node("streamTitle").stop()
+	get_node("streamGameOver").stop()
+	get_node("streamGameOn").play()
 		
 func chooseRune():
+	if PLAY != true:
+		return
 	var runeSelector = rand_range(0, stats.maxRuneProbability)
 	var lowest = stats.maxRuneProbability
 	for r in stats.dictStats:
@@ -133,6 +189,8 @@ func chooseRune():
 	return stats.dictStats[lowest]
 
 func notInSelected(x, y):
+	if PLAY != true:
+		return
 	for i in range(0,selectedTileCnt):
 		var st = selectedTiles[i]
 		if (st[0] == x) && (st[1] == y):
@@ -140,6 +198,8 @@ func notInSelected(x, y):
 	return true
 
 func clearSelected():
+	if PLAY != true:
+		return
 	print("Entering clearSelected")
 	for i in range(0,selectedTileCnt):
 		if selectedTiles[i] != [-1,-1,null]:
@@ -152,7 +212,9 @@ func clearSelected():
 	crtWdNode.set_text(createdWord)
 	print("done")
 	
-func _on_tile_pressed(btn, x, y):
+func _on_tile_pressed(btn, x, y):	
+	if PLAY != true:
+		return
 	var txt = btn.get_text()
 	if ((lastTile[0] == -1) || (lastTile[1] == -1)) || (x<=(lastTile[0]+1)) && (x>=(lastTile[0]-1)) && (y<=(lastTile[1]+1)) && (y>=(lastTile[1]-1)) && ((lastTile[0] != x) || (lastTile[1] != y)) && (notInSelected(x,y)):
 		lastTile = [x,y]
@@ -181,12 +243,17 @@ func _on_tile_pressed(btn, x, y):
 			destroyAndFall()
 			clearSelected()
 			if score >= nextLevelAt:
+				gameTimer.stop()
 				level = level + 1
-				nextLevelAt = nextLevelAt+(level * 100)
+				oldLevelAt = nextLevelAt
+				nextLevelAt = nextLevelAt+(level * 100)				
 				get_node("levelWord").set_text(str(level))
 				sfxNode.play("levelup", false)
+				timer = lastTimer
 				print("next level at : ",nextLevelAt)
 				rebuildGrid()
+				gameTimer.start()
+			progressionBar.setProgression(score-oldLevelAt, nextLevelAt-oldLevelAt)
 			
 	else:
 		clearSelected()
@@ -197,6 +264,8 @@ func _on_tile_pressed(btn, x, y):
 		createdWord = txt
 		
 func destroyAndFall():
+	if PLAY != true:
+		return
 	# DESTROY
 	for i in range(0,selectedTileCnt):
 		var x = selectedTiles[i][0]
@@ -240,9 +309,10 @@ func destroyAndFall():
 				c = chooseRune()
 			grid[y*_sizeX+x].set_text(c)
 			
-		 
 		
 func rcsvGetLetterAbove(x,y):
+	if PLAY != true:
+		return
 	var idx = y*_sizeX+x
 	var cnt = grid[idx].get_text()
 	if cnt != "":
@@ -256,6 +326,8 @@ func rcsvGetLetterAbove(x,y):
 			return rcsvGetLetterAbove(x,y)
 	
 func checkWord(w):
+	if PLAY != true:
+		return
 	if w.length() < 3:
 		return false
 	var prefix = w.substr(0,3)

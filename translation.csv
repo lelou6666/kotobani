@@ -4,6 +4,8 @@ BUFFER,selected,ausgewählt,selection
 LASTWORD,last word,letztes Wort,dernier mot
 LONGWORD,longest word,längstes Wort,mot le plus long
 LEVEL,level,Stufe,niveau
-GIVEUP,give up,aufgeben,abandonner
-HELP,help,Hilfe,aide
+EXIT,EXIT,RAUS,SORTIR
+HELP,HELP,HILFE,AIDE
 BESTWORD,best word,bestes Wort,meilleur mot
+OPTIONS,OPTIONS,OPTIONEN,OPTIONS
+PLAY,PLAY,SPIELEN,JOUER
