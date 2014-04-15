@@ -1,21 +1,18 @@
-::res://::1397577282
-Game Over.png::ImageTexture::1397505729::
+::res://::1397581447
+FOR_ENGLISH_RENAME_TO_options.gd::GDScript::1397580574::
 arrows.scn::PackedScene::1396252588::
-background.png::ImageTexture::1397496617::
-black.png::ImageTexture::1397331374::
 credits.gd::GDScript::1397544134::
-game.gd::GDScript::1397577282::
-game.scn::PackedScene::1397576042::
+game.gd::GDScript::1397581447::
+game.scn::PackedScene::1397580937::
 gameover.scn::PackedScene::1397544134::
 icon.png::ImageTexture::1396252588::
 kotobani.scn::PackedScene::1397496894::
-options.gd::GDScript::1397573774::
+options.gd::GDScript::1397582169::
 particles_rainbow.scn::PackedScene::1397054748::
 progression_bar.scn::PackedScene::1397330872::
-progressionbar.gd::GDScript::1397577282::
+progressionbar.gd::GDScript::1397581447::
 progressionbar.png::ImageTexture::1397497194::
 sparkle.png::ImageTexture::1397051025::
-tile.png::ImageTexture::1396252588::
 tile.scn::PackedScene::1397289241::
 tile_style.res::StyleBoxTexture::1396252588::
 tile_styleboxtexture.sbx::StyleBoxTexture::1396252588::
@@ -25,8 +22,7 @@ tilefont_20w.fnt::Font::1397142829::font<>assets/fonts/bauhaus_.ttf<>039a044106d
 tilefont_40w.fnt::Font::1397287988::font<>../assets/fonts/biminr__.ttf<>a882c0d99b10509a4aeac30bff5f9a73<>1397157684
 tilefont_80.fnt::Font::1397158335::font<>../assets/fonts/biminr__.ttf<>a882c0d99b10509a4aeac30bff5f9a73<>1397157684
 tilefont_80w.fnt::Font::1397151872::font<>../assets/fonts/bauhaus_.ttf<>039a044106dafd5f6b7961a59699d8f8<>1397142354
-titlescreen.gd::GDScript::1397577282::
-titlescreen.png::ImageTexture::1397491788::
+titlescreen.gd::GDScript::1397581447::
 translation.de.xl::PHashTranslation::1397542957::translation<>./translation.csv<>faf8ecbd5861251e6b194c5bce47b033<>1397507890
 translation.en.xl::PHashTranslation::1397542957::translation<>./translation.csv<>faf8ecbd5861251e6b194c5bce47b033<>1397507890
 translation.fr.xl::PHashTranslation::1397542957::translation<>./translation.csv<>faf8ecbd5861251e6b194c5bce47b033<>1397507890
@@ -40,10 +36,9 @@ stats.gd::GDScript::1397226084::
 ::res://dicts/en_US::1397225925
 references.gd::GDScript::1397225925::
 stats.gd::GDScript::1397225925::
-::res://gfx::1397575518
+::res://gfx::1397581040
 Game Over.tex::ImageTexture::1397506182::texture_2d<>./Game Over.png<>66f891999d5a2030b7551552a9012057<>1397505729
 background.tex::ImageTexture::1397496818::texture_2d<>./background.png<>6b7eaccc05b5ec3c4f0a9f72bf960dbd<>1397496617
-npc_yoga_frog_box_box_variant_frogRed_x1_idle_png_1354833606.tex::ImageTexture::1397575518::texture_2d<>../../../Downloads/glitch-assets/npc_yoga_frog_box_box_variant_frogRed/npc_yoga_frog_box_box_variant_frogRed_x1_idle_png_1354833606.png<>7b8777a349612f6013e16f6de8b76fed<>1359003916
 titlescreen.tex::ImageTexture::1397496834::texture_2d<>./titlescreen.png<>9284fe63c0962a8c9c70fa8d362fc2fc<>1397491788
 ::res://music::1397490694
 glitch_dirge_of_the_damned.ogg::AudioStreamOGGVorbis::1397141175::

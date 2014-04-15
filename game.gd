@@ -17,7 +17,7 @@
 extends Node2D
 
 const _VERSION = "alpha_8"
-const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nDO NOT REDISTRIBUTE!"
+const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
 const _startY = 0
