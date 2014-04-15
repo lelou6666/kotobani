@@ -117,14 +117,13 @@ func gameOver():
 	get_node("streamTitle").stop()
 	get_node("streamGameOn").stop()
 	get_node("streamGameOver").play()
-	get_node("gameover/continue").connect("pressed", self, "titleMenu")
 	get_node("gameover/continue").connect("pressed",self,"titleMenu")
 	if score > highScore_m0:
 		highScore_m0 = score
 	get_node("gameover/finalScore").set_text(str(score))
 	get_node("gameover/highScore").set_text(str(highScore_m0))
 	get_node("gameover/longWord").set_text(longestWord)
-	
+		
 func _time_out():
 	if PLAY != true:
 		return
@@ -155,6 +154,11 @@ func _ready():
 	get_node("streamTitle").play()
 	get_node("streamGameOver").stop()
 	get_node("streamGameOn").stop()
+	get_node("lastword-label").set_text(TranslationServer.translate("LASTWORD"))
+	get_node("buffer-label").set_text(TranslationServer.translate("BUFFER"))
+	get_node("longest-label").set_text(TranslationServer.translate("LONGWORD"))
+	get_node("score-label").set_text(TranslationServer.translate("SCORE"))
+	get_node("level-label").set_text(TranslationServer.translate("LEVEL"))
 	titleMenu()
 	
 func titleMenu():
