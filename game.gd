@@ -1,11 +1,24 @@
+#    Kotobani - a game in which you create words to increase your points
+#    Copyright (C) 2014  sammy fischer (sammy@cosmic-bandito.com)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 extends Node2D
 
 const _VERSION = "alpha_8"
 const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nDO NOT REDISTRIBUTE!"
 
-# member variables here, example:
-# var a=2
-# var b="textvar"
 const _startX = 224
 const _startY = 0
 const _sizeX = 16
@@ -13,7 +26,7 @@ const _sizeY = 12
 const _tileSize = 50
 const _halfTileSize = 25
 const _HIGHEST = 999999
-const _initialTimer = 60*15
+const _initialTimer = 60*2
 
 var PLAY = false
 var grid = []
@@ -22,11 +35,6 @@ var stars = []
 var tile = preload("res://tile.scn")
 var starsPrtcl = preload("res://particles_rainbow.scn")
 
-var selectedTiles = []
-var lastTile = [-1,-1]
-var createdWord = ""
-var selectedTileCnt = 0
-var score = 0
 var scoreNode = null
 var sfxNode = null
 var lgWdNode = null
@@ -34,21 +42,32 @@ var crtWdNode = null
 var lstWdNode = null
 var progressionBar = null
 
+
+var soundToggle = 1
+var musicToggle = 1
+
 var gameTimer = null
 var timer = _initialTimer
 var lastTimer = timer
 var timerNode = null
 
-var soundToggle = 1
-var musicToggle = 1
+var selectedTiles = []
+var lastTile = [-1,-1]
+var createdWord = ""
+var selectedTileCnt = 0
+var score = 0
+var longestWord = ""
 var level = 1
 var nextLevelAt = 200
 var oldLevelAt = 0
-var longestWord = ""
+
+var gameMode = 0
+var highScore_m0 = 0
+var highScore_m1 = 0
 
 var lowestOrderedPerX = []
 
-var language = null
+var options = null
 
 var stats = null
 var refs = null
@@ -89,13 +108,23 @@ func gameOver():
 		return
 	gameTimer.stop()
 	PLAY = false
-	get_node("streamNode").stop()
-	get_node("streamNode").set_stream("gameover")
+	for i in range(_sizeX*_sizeY):
+		grid[i].remove_and_skip()
+		stars[i].remove_and_skip()
+	get_node("gameover").set_pos(Vector2(0,0))
+	get_node("gameover").raise()
+	get_node("titlescreen").set_pos(Vector2(-10000,-10000))
 	get_node("streamTitle").stop()
 	get_node("streamGameOn").stop()
 	get_node("streamGameOver").play()
-	print("****** GAME OVER MAN! GAME OVER! ******")
-
+	get_node("gameover/continue").connect("pressed", self, "titleMenu")
+	get_node("gameover/continue").connect("pressed",self,"titleMenu")
+	if score > highScore_m0:
+		highScore_m0 = score
+	get_node("gameover/finalScore").set_text(str(score))
+	get_node("gameover/highScore").set_text(str(highScore_m0))
+	get_node("gameover/longWord").set_text(longestWord)
+	
 func _time_out():
 	if PLAY != true:
 		return
@@ -107,32 +136,60 @@ func _time_out():
 		gameTimer.stop()
 		gameOver()
 
+func getOut():
+	self.remove_and_skip()
+
 func _ready():
 	randomize()
 
-	language = load("res://language.gd").new()
-	stats = load("res://dicts/"+language.locale+"/stats.gd").new()
-	refs = load("res://dicts/"+language.locale+"/references.gd").new()
+	options = load("res://options.gd").new()
+	stats = load("res://dicts/"+options.locale+"/stats.gd").new()
+	refs = load("res://dicts/"+options.locale+"/references.gd").new()
 	get_node("version").set_text(_VERSION+_COPYRIGHT)
-	print("locale :",language.locale)
-	TranslationServer.set_locale(language.locale)
+	print("locale :",options.locale)
+	TranslationServer.set_locale(options.locale)
+	highScore_m0 = options.highScore_m0
+	highScore_m1 = options.highScore_m1
 	get_node("titlescreen/Grid/playBtn").connect("pressed", self, "play")
+	get_node("titlescreen/Grid/exitBtn").connect("pressed", self, "getOut")
 	get_node("streamTitle").play()
 	get_node("streamGameOver").stop()
 	get_node("streamGameOn").stop()
+	titleMenu()
 	
+func titleMenu():
+	get_node("streamTitle").play()
+	get_node("streamGameOver").stop()
+	get_node("streamGameOn").stop()
+	get_node("gameover").set_pos(Vector2(-10000,-10000))
+	get_node("titlescreen").set_pos(Vector2(0,0))
+		
+		
 func play():
 	if PLAY == true:
 		return
+	timer = _initialTimer
+	lastTimer = timer
+	selectedTiles = []
+	lastTile = [-1,-1]
+	createdWord = ""
+	selectedTileCnt = 0
+	score = 0
+	longestWord = ""
+	level = 1
+	nextLevelAt = 200
+	oldLevelAt = 0
+
+	get_node("streamTitle").stop()
 	get_node("titlescreen").set_pos(Vector2(-10000,-10000))
 	PLAY = true
 	var sX = _startX
 	var sY = _startY
-	get_node("lastword-label").set_text(TranslationServer.translate("LASTWORD")+" :")
-	get_node("longest-label").set_text(TranslationServer.translate("LONGWORD")+" :")
-	get_node("buffer-label").set_text(TranslationServer.translate("BUFFER")+" :")
-	get_node("score-label").set_text(TranslationServer.translate("SCORE")+" :")
-	get_node("level-label").set_text(TranslationServer.translate("LEVEL")+" :")
+	#get_node("lastword-label").set_text(TranslationServer.translate("LASTWORD")+" :")
+	#get_node("longest-label").set_text(TranslationServer.translate("LONGWORD")+" :")
+	#get_node("buffer-label").set_text(TranslationServer.translate("BUFFER")+" :")
+	#get_node("score-label").set_text(TranslationServer.translate("SCORE")+" :")
+	#get_node("level-label").set_text(TranslationServer.translate("LEVEL")+" :")
 	get_node("levelWord").set_text(str(level))
 
 	scoreNode = get_node("scoreDisplay")
@@ -173,6 +230,9 @@ func play():
 			sX += _tileSize
 		sX = _startX
 		sY += _tileSize
+	for i in range(_sizeY*_sizeX):
+		stars[i].raise()
+		
 	set_process_input(true)
 	get_node("streamTitle").stop()
 	get_node("streamGameOver").stop()
@@ -249,7 +309,7 @@ func _on_tile_pressed(btn, x, y):
 				nextLevelAt = nextLevelAt+(level * 100)				
 				get_node("levelWord").set_text(str(level))
 				sfxNode.play("levelup", false)
-				timer = lastTimer
+				timer = lastTimer+(60*(level/2))
 				print("next level at : ",nextLevelAt)
 				rebuildGrid()
 				gameTimer.start()
@@ -334,7 +394,7 @@ func checkWord(w):
 	if ! refs.dictRefs.has(prefix):
 		return false
 	var fh = File.new()
-	fh.open("res://dicts/"+language.locale+"/"+refs.dictRefs[prefix], 1)
+	fh.open("res://dicts/"+options.locale+"/"+refs.dictRefs[prefix], 1)
 	var cnt = fh.get_as_text()
 	fh.close()
 	var rs = cnt.find("\n"+w+"\n",0)
