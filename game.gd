@@ -17,7 +17,7 @@
 extends Node2D
 
 const _VERSION = "beta_1"
-const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nDo Not Redistribute!"
+const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
 const _startY = 0
