@@ -13,17 +13,3 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-extends Sprite
-
-const _VERSION = "alpha_8"
-	
-func _ready():
-	var options = load("res://options.gd").new()
-	get_node("version").set_text(_VERSION)
-	print("locale :",options.locale)
-	TranslationServer.set_locale(options.locale)
-	get_node("Grid/helpBtn").set_text(TranslationServer.translate("HELP"))
-	get_node("Grid/optionBtn").set_text(TranslationServer.translate("OPTIONS"))
-	get_node("Grid/playBtn").set_text(TranslationServer.translate("PLAY"))
-	get_node("Grid/exitBtn").set_text(TranslationServer.translate("EXIT"))

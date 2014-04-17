@@ -1,9 +1,0 @@
-[application]
-
-name="Kotobani"
-icon="icon.png"
-
-[display]
-
-width=1024
-height=600
