@@ -31,7 +31,7 @@ const _localeCount = 3
 const locale = ["en_US","de_DE","fr_FR"]
 
 var currentLocale = 0
-var initialTimer = [[60*2,30],[60,15]]
+var initialTimer = [[60*2,30],[60,15],[-1,-1]]
 
 var PLAY = false
 var grid = []
@@ -71,7 +71,7 @@ var oldLevelAt = 0
 
 var gameMode = 0
 var gameDifficulty = 0
-var highScore = [[0,0],[0,0]]
+var highScore = [[0,0],[0,0],[0,0]]
 
 var lowestOrderedPerX = []
 
@@ -96,7 +96,7 @@ func storeOptions():
 	fh.open("options.gd", File.WRITE)
 	fh.store_line("var locale=\""+options.locale+"\"")
 	fh.store_line("var localeIdx="+str(currentLocale)+"")
-	fh.store_line("var highScore = [["+str(highScore[0][0])+","+str(highScore[0][1])+"],["+str(highScore[1][0])+","+str(highScore[1][1])+"]]")
+	fh.store_line("var highScore = [["+str(highScore[0][0])+","+str(highScore[0][1])+"],["+str(highScore[1][0])+","+str(highScore[1][1])+"],["+str(highScore[2][0])+","+str(highScore[2][1])+"]]")
 	fh.store_line("var music="+str(musicToggle))
 	fh.store_line("var sfx="+str(soundToggle))
 	fh.close()
@@ -129,7 +129,10 @@ func _input(e):
 		if PLAY == true:
 			PLAY = false
 			gameTimer.stop()
-			freeGrid()			
+			freeGrid()
+			if gameMode == 2:
+				PLAY = true
+				gameOver()
 			titleMenu()
 	elif e.is_action("pause"):
 		preventKeyRepeat()
@@ -242,6 +245,7 @@ func setTranslations():
 
 	get_node("help/helpLabel").set_text(TranslationServer.translate("HELP"))
 	get_node("help/backBtn").set_text(TranslationServer.translate("BACK"))
+	get_node("help/helpText").set_text(TranslationServer.translate("HELPTEXT"))
 	
 	get_node("gameover/finalLabel").set_text(TranslationServer.translate("FINALSCORE"))	
 	get_node("gameover/highscoreLabel").set_text(TranslationServer.translate("HIGHSCORE"))
@@ -275,7 +279,7 @@ func toggleSound():
 	storeOptions()
 
 func toggleGameMode():
-	gameMode = (gameMode+1) % 2
+	gameMode = (gameMode+1) % 3
 	var modeLabel = "MODE"+str(gameMode)
 	get_node("options/grid/modeBtn").set_text(TranslationServer.translate(modeLabel))
 	var txt = TranslationServer.translate("description_mode_"+str(gameMode))
@@ -387,8 +391,11 @@ func play():
 	crtWdNode.set_text("")
 	scoreNode.set_text("0")
 	progressionBar.setProgression(score-oldLevelAt, nextLevelAt-oldLevelAt)
-	gameTimer.start()
-
+	
+	if gameMode != 2:
+		gameTimer.start()
+	else:
+		timerNode.set_text("")
 	grid.resize(_sizeX*_sizeY)
 	stars.resize(_sizeX*_sizeY)
 	selectedTiles.resize(_sizeX*_sizeY)
