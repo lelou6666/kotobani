@@ -99,6 +99,8 @@ func storeOptions():
 	fh.store_line("var highScore = [["+str(highScore[0][0])+","+str(highScore[0][1])+"],["+str(highScore[1][0])+","+str(highScore[1][1])+"],["+str(highScore[2][0])+","+str(highScore[2][1])+"]]")
 	fh.store_line("var music="+str(musicToggle))
 	fh.store_line("var sfx="+str(soundToggle))
+	fh.store_line("var gameMode="+str(gameMode))
+	fh.store_line("var gameDifficulty="+str(gameDifficulty))
 	fh.close()
 
 func resetKeyPressed():
@@ -133,7 +135,8 @@ func _input(e):
 			if gameMode == 2:
 				PLAY = true
 				gameOver()
-			titleMenu()
+			else:
+				titleMenu()
 	elif e.is_action("pause"):
 		preventKeyRepeat()
 		if PLAY == true:
@@ -156,7 +159,8 @@ func pause():
 
 func unpause():
 	PLAY = true
-	gameTimer.start()
+	if gameMode != 2:
+		gameTimer.start()
 	setScene("game")
 	
 func options():
@@ -225,8 +229,15 @@ func setTranslations():
 	get_node("score-label").set_text(TranslationServer.translate("SCORE"))
 	get_node("level-label").set_text(TranslationServer.translate("LEVEL"))
 
-	get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSIC"))
-	get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUND"))
+	if musicToggle:
+		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICON"))
+	else:
+		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICOFF"))
+	if soundToggle:
+		get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUNDON"))
+	else:
+		get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUNDOFF"))	
+		
 	var modeLabel = "MODE"+str(gameMode)
 	get_node("options/grid/modeBtn").set_text(TranslationServer.translate(modeLabel))
 	var difLabel = "DIFFICULTY"+str(gameDifficulty)
@@ -257,6 +268,10 @@ func setTranslations():
 
 func toggleMusic():
 	musicToggle ^= 1
+	if musicToggle:
+		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICON"))
+	else:
+		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICOFF"))
 	if ! musicToggle:
 		get_node("streamTitle").stop()
 		get_node("streamGameOver").stop()
@@ -276,7 +291,12 @@ func toggleMusic():
 func toggleSound():
 	soundToggle ^= 1
 	get_node("options/grid/soundBtn").set_pressed(soundToggle)
-	storeOptions()
+	if soundToggle:
+		get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUNDON"))
+	else:
+		get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUNDOFF"))	
+
+		storeOptions()
 
 func toggleGameMode():
 	gameMode = (gameMode+1) % 3
@@ -311,14 +331,28 @@ func _ready():
 	options = load("res://options.gd").new()
 	get_node("version").set_text(_VERSION+_COPYRIGHT)
 	get_node("titlescreen/version").set_text(_VERSION)
+	if (options.localeIdx == null) || (options.localeIdx < 0) && (options.localIdx >= _localeCount):
+		options.localeIdx = 0
 	options.locale = locale[options.localeIdx]
 	currentLocale = options.localeIdx
-	print("locale :",options.locale)
+	if (options.highScore) != null  && (options.highScore.size() == highScore.size()):
+		highScore = options.highScore
+		
+	if options.sfx != null:
+		soundToggle = options.sfx
+		
+	if options.music != null:
+		musicToggle = options.music
+		
+	if options.gameMode != null:
+		gameMode = options.gameMode
+
+	if options.gameDifficulty != null:
+		gameDifficulty = options.gameDifficulty
+		
 	TranslationServer.set_locale(options.locale)
 	setTranslations()
-	highScore = options.highScore
-	soundToggle = options.sfx
-	musicToggle = options.music
+
 	if ! musicToggle:
 		get_node("streamTitle").stop()
 		get_node("streamGameOver").stop()
@@ -509,7 +543,8 @@ func _on_tile_pressed(btn, x, y):
 				if gameMode == 0:					
 					timer = (60/(1+gameDifficulty))+ceil(60.0*(float(level)/((gameDifficulty+1)*2.0)))
 				rebuildGrid()
-				gameTimer.start()
+				if gameMode != 2:
+					gameTimer.start()
 			progressionBar.setProgression(score-oldLevelAt, nextLevelAt-oldLevelAt)
 			
 	else:

@@ -17,8 +17,10 @@ DIFFICULTY0,EASY,EINFACH,FACILE
 description_mode_0,The timer will be reset and slightly increased when you reach a new level.,Der Timer wird am Anfang jeder Stufe zurückgesetzt und verlängert.,Le compte a rebours est reinitialisé et augmenté à chaque fois qu'un nouveau niveau est atteind.
 description_mode_1,You have XXXX seconds to find the next word.,Sie haven XXXX Sekunden um das nächste Wort zu finden.,Vous avez XXXX secondes pour trouver le prochain mot.
 description_mode_2,No time limit. The difficulty setting doesn't anything in that mode.,Kein Zeit Limit. Die Schwierigkeitseinstellung ändert nichts.,Aucune limite de temps. L'option de difficulté n'a aucune influence dans ce mode de jeu.
-MUSIC,MUSIC,MUSIK,MUSIQUES
-SOUND,SFX,GERÄUSCHE,SONS
+MUSICON,MUSIC ON,MUSIK AN,MUSIQUES
+MUSICOFF,MUSIC OFF,MUSIK AUS,PAS DE MUSIQUES
+SOUNDON,SFX ON,GERÄUSCHE AN,SONS
+SOUNDOFF,SFX OFF,GERÄUSCHE AUS,PAS DE SONS
 BACK,BACK,ZURÜCK,RETOUR
 LOCALE,ENGLISH,DEUTSCH,FRANÇAIS
 MODE0,MODE 1,MODUS 1,MODE 1
