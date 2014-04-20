@@ -30,23 +30,24 @@ Press P to pause
 In case you think it is a clone of Popcap "Bookworm", you may congratulate yourself. It is indeed heavily influenced by Bookworm. The main differences apart from a few game mechanics, is that Kotobani is cross-platform, GPL v3-free, and should be able to cope with any language not based on ideogrammes. Japanese is a good example : Kotobani should work with Hiragana and Katakana charsets but will most probably not "work" with Kanji.
 
 Supported languages so far
-	  * English
-	  * German
-	  * French
+* English
+* German
+* French
 
 let me know if you want others. The Dictionaries are extracted from the aspell rws files and take time and some work to prepare.
 
 CHANGELOG:
 ----------
 Beta_2:
-	+ added a relaxed mode without time limit
-	+ labeled the music and sound buttons according to their state
-	+ added the game mode and difficulty to the parameters being saved in options.gd
-	+ created the help panels
-	- fixed a bug with the flying frog
+
+* added a relaxed mode without time limit
+* labeled the music and sound buttons according to their state
+* added the game mode and difficulty to the parameters being saved in options.gd
+* created the help panels
+* fixed a bug with the flying frog
 
 
 THINGS I'D LIKE TO ADD IN THE NEXT RELEASE:
 -------------------------------------------
-	* a "tile falling" animation (at the moment it is not clear that the tiles are sliding down when a word has been found)
-	* random amount of lengthy (5+) words on grid rebuild, to make sure there are some ( although the chances that there are anyway right now is high. they can just be VERY difficult to find)
+* a "tile falling" animation (at the moment it is not clear that the tiles are sliding down when a word has been found)
+* random amount of lengthy (5+) words on grid rebuild, to make sure there are some ( although the chances that there are anyway right now is high. they can just be VERY difficult to find)
