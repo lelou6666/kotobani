@@ -52,6 +52,7 @@ var keyPressed = false
 
 var soundToggle = 1
 var musicToggle = 1
+var doNotRestartMusic = false
 
 var gameTimer = null
 var timer = initialTimer[0][0]
@@ -84,6 +85,7 @@ func setScene(scene):
 	get_node("gameover").hide()
 	get_node("options").hide()
 	get_node("pause").hide()
+	get_node("help").hide()
 	if scene != "game":
 		get_node(scene).show()
 		get_node(scene).raise()
@@ -155,6 +157,7 @@ func unpause():
 	setScene("game")
 	
 func options():
+	doNotRestartMusic = true
 	setScene("options")
 
 func freeGrid():
@@ -188,7 +191,13 @@ func gameOver():
 		get_node("gameover/gotHighscore").show()
 		fireworks(true)
 	storeOptions()			
-		
+
+func help():
+	if PLAY == true:
+		return
+	doNotRestartMusic = true
+	setScene("help")
+	
 func _time_out():
 	if PLAY != true:
 		return
@@ -200,7 +209,6 @@ func _time_out():
 		gameTimer.stop()
 		gameOver()
 	
-
 func getOut():
 	self.remove_and_skip()
 
@@ -231,10 +239,17 @@ func setTranslations():
 	get_node("titlescreen/Grid/optionBtn").set_text(TranslationServer.translate("OPTIONS"))
 	get_node("titlescreen/Grid/playBtn").set_text(TranslationServer.translate("PLAY"))
 	get_node("titlescreen/Grid/exitBtn").set_text(TranslationServer.translate("EXIT"))
+
+	get_node("help/helpLabel").set_text(TranslationServer.translate("HELP"))
+	get_node("help/backBtn").set_text(TranslationServer.translate("BACK"))
 	
 	get_node("gameover/finalLabel").set_text(TranslationServer.translate("FINALSCORE"))	
 	get_node("gameover/highscoreLabel").set_text(TranslationServer.translate("HIGHSCORE"))
 	get_node("gameover/longestWordLabel").set_text(TranslationServer.translate("LONGWORD"))
+	get_node("gameover/gotHighscore").set_text(TranslationServer.translate("HIGHSCORE"))
+	get_node("gameover/continue").set_text(TranslationServer.translate("CONTINUE"))
+
+	get_node("pause/continueBtn").set_text(TranslationServer.translate("CONTINUE"))
 
 func toggleMusic():
 	musicToggle ^= 1
@@ -310,6 +325,7 @@ func _ready():
 	get_node("titlescreen/Grid/playBtn").connect("pressed", self, "play")
 	get_node("titlescreen/Grid/exitBtn").connect("pressed", self, "getOut")
 	get_node("titlescreen/Grid/optionBtn").connect("pressed", self, "options")
+	get_node("titlescreen/Grid/helpBtn").connect("pressed", self, "help")
 	get_node("options/backBtn").connect("pressed", self, "titleMenu")
 	get_node("options/grid/musicBtn").connect("pressed", self, "toggleMusic")
 	get_node("options/grid/soundBtn").connect("pressed", self, "toggleSound")
@@ -318,6 +334,7 @@ func _ready():
 	get_node("options/grid/localeBtn").connect("pressed", self, "toggleLocale")
 	get_node("pause/continueBtn").connect("pressed", self, "unpause")
 	get_node("keyTimer").connect("timeout",self,"resetKeyPressed")
+	get_node("help/backBtn").connect("pressed", self, "titleMenu")
 	get_node("streamTitle").play()
 	get_node("streamGameOver").stop()
 	get_node("streamGameOn").stop()
@@ -336,10 +353,11 @@ func _ready():
 func titleMenu():
 	fireworks(false)
 	setScene("titlescreen")
-	if musicToggle:
+	if musicToggle && (! doNotRestartMusic):
 		get_node("streamTitle").play()
 		get_node("streamGameOver").stop()
 		get_node("streamGameOn").stop()
+	doNotRestartMusic = false
 				
 func play():
 	if PLAY == true:
