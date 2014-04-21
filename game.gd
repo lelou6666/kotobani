@@ -16,7 +16,7 @@
 
 extends Node2D
 
-const _VERSION = "beta_2"
+const _VERSION = "beta_2.1"
 const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
@@ -488,7 +488,6 @@ func notInSelected(x, y):
 func clearSelected():
 	if PLAY != true:
 		return
-	print("Entering clearSelected")
 	for i in range(0,selectedTileCnt):
 		if selectedTiles[i] != [-1,-1,null]:
 			selectedTiles[i][2].set_pressed(false)
@@ -554,6 +553,8 @@ func _on_tile_pressed(btn, x, y):
 		selectedTiles[selectedTileCnt]=[x,y,btn]
 		selectedTileCnt = 1
 		createdWord = txt
+		crtWdNode.set_text(createdWord)
+		
 		
 func destroyAndFall():
 	if PLAY != true:
