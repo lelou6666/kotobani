@@ -62,7 +62,3 @@ Beta_2:
 * fixed a bug with the flying frog
 
 
-THINGS I'D LIKE TO ADD IN THE NEXT RELEASE:
--------------------------------------------
-* a "tile falling" animation (at the moment it is not clear that the tiles are sliding down when a word has been found)
-* random amount of lengthy (5+) words on grid rebuild, to make sure there are some ( although the chances that there are anyway right now is high. they can just be VERY difficult to find)

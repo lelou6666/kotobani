@@ -88,6 +88,10 @@ var options = null
 var stats = null
 var refs = null
 
+func _exit_scene():
+	freeGrid()
+	
+
 func setScene(scene):
 	get_node("titlescreen").hide()
 	get_node("gameover").hide()
@@ -138,15 +142,11 @@ func _input(e):
 		toggleSound()
 	elif e.is_action("escape"):
 		preventKeyRepeat()
+		if FALLING == true:
+			get_node("fallingTimer").disconnect("timeout", self, "timedFalling")
 		if PLAY == true:
-			PLAY = false
 			gameTimer.stop()
-			if gameMode == 2:
-				PLAY = true
-				gameOver()
-			else:
-				freeGrid()
-				titleMenu()
+			gameOver()
 	elif e.is_action("pause"):
 		preventKeyRepeat()
 		if PLAY == true:
@@ -201,7 +201,6 @@ func gameOver():
 		get_node("streamTitle").stop()
 		get_node("streamGameOn").stop()
 		get_node("streamGameOver").play()
-	get_node("gameover/continue").connect("pressed",self,"titleMenu")
 	get_node("gameover/finalScore").set_text(str(score))
 	get_node("gameover/highScore").set_text(str(highScore[gameMode][gameDifficulty]))
 	get_node("gameover/longWord").set_text(longestWord)
@@ -391,6 +390,7 @@ func _ready():
 	get_node("streamTitle").play()
 	get_node("streamGameOver").stop()
 	get_node("streamGameOn").stop()
+	get_node("gameover/continue").connect("pressed",self,"titleMenu")
 
 	scoreNode = get_node("scoreDisplay")
 	sfxNode = get_node("sfxNode")
@@ -477,10 +477,7 @@ func play():
 	set_process_input(true)
 	if musicToggle > 0:
 		get_node("streamGameOver").stop()
-		if musicToggle == 1:
-			get_node("streamGameOn").stop()
-			get_node("streamTitle").play()		
-		else:
+		if musicToggle == 2:
 			get_node("streamGameOn").play()
 			get_node("streamTitle").stop()
 		
@@ -635,7 +632,7 @@ func destroyAndFall():
 			grid[gidx].set_text(c)
 	# FALL
 	FALLING = true
-	get_node("fallingTimer").connect("timeout", self, "timedFalling")	
+	get_node("fallingTimer").connect("timeout", self, "timedFalling")
 
 func setBonus(btn):
 	var rnb = randi()%100
