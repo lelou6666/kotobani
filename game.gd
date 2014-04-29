@@ -16,7 +16,7 @@
 
 extends Node2D
 
-const _VERSION = "1.1.1"
+const _VERSION = "1.1.1b"
 const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
@@ -89,8 +89,7 @@ var stats = null
 var refs = null
 
 func _exit_scene():
-	freeGrid()
-	
+	pass	
 
 func setScene(scene):
 	get_node("titlescreen").hide()
@@ -429,7 +428,8 @@ func play():
 	level = 1
 	nextLevelAt = 200
 	oldLevelAt = 0
-	get_node("streamTitle").stop()
+	if musicToggle != 1:
+		get_node("streamTitle").stop()		
 	get_node("titlescreen").hide()
 	PLAY = true
 	var sX = _startX
