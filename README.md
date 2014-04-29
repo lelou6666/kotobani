@@ -27,6 +27,9 @@ Double click on the last letter to validate.
 Right click to clear the selection.
 Press P to pause
 
+Rainbow tiles multiplies the score of the final words. Each rainbow tile increase the multiplicator by 1, starting at 2. So a 3 letter word would bring 3 points, if it uses a rainbow tile, you will get 6 points (3x2),  if you can get 2 rainbow tiles in it, you will get 3x3 points, etc ...
+Note that the longer the word the more points a tile brings anyway.
+
 In case you think it is a clone of Popcap "Bookworm", you may congratulate yourself. It is indeed heavily influenced by Bookworm. The main differences apart from a few game mechanics, is that Kotobani is cross-platform, GPL v3-free, and should be able to cope with any language not based on ideogrammes. Japanese is a good example : Kotobani should work with Hiragana and Katakana charsets but will most probably not "work" with Kanji.
 
 Supported languages so far
@@ -38,6 +41,14 @@ let me know if you want others. The Dictionaries are extracted from the aspell r
 
 CHANGELOG:
 ----------
+1.1.0:
+* fixed the bugs found by Mole
+* added visual sliding
+* added bonus (rainbow) tiles 
+
+1.0.0:
+* game should be playable and (mostly bug free)
+
 Beta_2:
 
 * added a relaxed mode without time limit
