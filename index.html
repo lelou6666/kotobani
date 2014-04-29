@@ -37,12 +37,16 @@
         <a href="https://i.imgur.com/mXtPg0Z.jpg" target="_blank"><img src="https://i.imgur.com/mXtPg0Z.jpg" style="float:right;width:200px"></a>
         <p><h3>LICENSE:</h3>GPLv3</p>
         <p><h3>Latest Version:</h3>1.1.0.<br>Changelog:<br>
+<h4>1.1.1</h4>
+<ul>
+<li>fixed various bugs</li>
+<li>added the option to switch between two different gameplay music</li>
+</ul>
 <h4>1.1.0</h4>
 <ul>
 <li>fixed the bugs found by Mole</li>
 <li>added visual sliding</li>
 <li>added bonus (rainbow) tiles</li>
-<li>introduced a new bug (see below)</li>
 </ul>
 <h4>1.0.0:</h4>
 <ul>
@@ -61,26 +65,22 @@
         </p>
 <p><h3>SOME BACKGROUND, THE BUG AND FURTHER DEVELOPMENT:</h3>
 I wrote this game for a couple of reasons.<br>First of all I was in a one and half months job hiatus, with plenty of time to spare. I also wanted to check out this newfangled Godot Engine which kept creeping up in the tech news I read. Additionally, I wanted to create a Bookworm clone with better localization, as the original, whilst a lot of fun, was lacking when playing in anything but english.<br>
-My six weeks or so of freedom from pressure are now over, and sadly indentured rent-paying work has a way of crushing to death any creativity I might have in my free time, so I will probably stop working on Kotobani altogether and never fix The Bug, but the game is open source so maybe someone will.
-<br/>The Bug is simple : sometimes (And that's the main problem), tiles in the second row will not fill up when a word has been found split between the first and the second row. As I said : if you find out why, you're welcome to fix it yourself or tell me what you found.<br/>
+My six weeks or so of freedom from pressure are now over, and sadly indentured rent-paying work has a way of crushing to death any creativity I might have in my free time, so I will probably stop working on Kotobani altogether and never fix any bugs that might creep up, but the game is open source so maybe someone will.
+<br>One of those bugs is that the game doesn't exit gracefully btw. Sorry.
 <br>Another thing : <em>the Godot Engine</em> is actually awesome. At least for this kind of games. The 3D capacities seem to be very nice too, but having no time to check them I prefer to abstain from any judgement. If you want to create games easily without investing big $$$$ (Read : "without buying a Unity3D license") you should definitely check it out. Thanks a lot to the Godot Devs for the engine and the support in their IRC channel.
-so yeah .. sorry for the bug, I hope you enjoy the game anyway.
 </p>
 
 <p><h3>HOW TO BUILD:</h3>You will need the <a href="https://github.com/okamstudio/godot">Godot Engine</a>. Add the Kotobani source to the engine's project list and either run it inside the editor or export it to your platform of choice.</p>
 <p><h3>DOWNLOADS:</h3> 
-Downloads coming back soon. there was some weird happenstances during export.
-<!--
 <ul>
-          <li class="downloads"><a href="https://copy.com/Ya7zUu6jbrnA"</li>Linux 32bit</a></li>
-          <li class="downloads"><a href="https://copy.com/kWgO4Y4Eo6yb"</li>Linux 64bit</a></li>
-          <li class="downloads"><a href="https://copy.com/7W6ghLCO3FI9"</li>Win 64bit</a></li>
-          <li class="downloads"><a href="https://copy.com/qSCRN9B3GAGI"</li>Win 32bit</a></li>
-          <li class="downloads"><a href="https://copy.com/lldYIXDfwKJG"</li>OSX 64bit</a></li>
+          <li class="downloads"><a href="https://copy.com/S6v6pMwPJLiY"</li>Linux 32bit</a></li>
+          <li class="downloads"><a href="https://copy.com/2dCRHAJadbSL"</li>Linux 64bit</a></li>
+          <li class="downloads"><a href="https://copy.com/CSuvHeVbUTjG"</li>Win 64bit</a></li>
+          <li class="downloads"><a href="https://copy.com/LIRHAzxSqSMb"</li>Win 32bit</a></li>
+          <li class="downloads"><a href="https://copy.com/gWwqkidnCnab"</li>OSX 64bit</a></li>
 </ul>
 Note : the OSX and Win 32bit binaries have not been tested, as I lack the hardware to do so.
-->
-  
+
 </p>
 
 <p><h3>RULES:</h3>Form 3 letter words using adjacent tiles. the tiles must touch, but it doesn't matter where they touch. Diagonals are allowed. And you don't have to continue in the same direction to finish the word. So, if you can find an A with an R left from it, then another M ABOVE the previous R you would have a word. CLick twice on the ending letter to validate. Right mouse click restart the word. P to pause.<br>Rainbow tiles multiplies the score of the final words. Each rainbow tile increase the multiplicator by 1, starting at 2. So a 3 letter word would bring 3 points, if it uses a rainbow tile, you will get 6 points (3x2), if you can get 2 rainbow tiles in it, you will get 3x3 points, etc ... Note that the longer the word the more points a tile brings anyway.</p>
