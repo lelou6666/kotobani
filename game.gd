@@ -27,6 +27,8 @@ const _tileSize = 50
 const _halfTileSize = 25
 const _fallingSpeed = 5
 const _HIGHEST = 999999
+const _bonusChance = 1
+const _bonusMult = 2
 
 const _localeCount = 3
 const locale = ["en_US","de_DE","fr_FR"]
@@ -42,6 +44,7 @@ var literalBool = {false:"false",true:"true"}
 var tile = preload("res://tile.scn")
 var starsPrtcl = preload("res://particles_rainbow.scn")
 
+var transferBonus = false
 var scoreNode = null
 var sfxNode = null
 var lgWdNode = null
@@ -65,6 +68,7 @@ var lastTile = [-1,-1]
 var createdWord = ""
 var selectedTileCnt = 0
 var score = 0
+var currentBonus = 1
 var longestWord = ""
 var level = 1
 var nextLevelAt = 200
@@ -152,8 +156,10 @@ func rebuildGrid():
 		selectedTiles[i] = [-1,-1,null]
 	for i in range(_sizeY):
 		for s in range (_sizeX):
-			grid[(i*_sizeX+s)].set_text(chooseRune())
-			stars[i*_sizeX+s].set_emitting(true)
+			var gidx = i*_sizeX+s
+			grid[gidx].set_text(chooseRune())
+			stars[gidx].set_emitting(true)
+			setBonus(grid[gidx])
 
 func pause():
 	PLAY = false
@@ -408,7 +414,6 @@ func play():
 		return
 	setTranslations()
 	setScene("game")
-		
 	timer = initialTimer[gameMode][gameDifficulty]
 	lastTimer = timer
 	selectedTiles = []
@@ -417,6 +422,7 @@ func play():
 	selectedTileCnt = 0
 	score = 0
 	longestWord = ""
+	currentBonus = 1
 	level = 1
 	nextLevelAt = 200
 	oldLevelAt = 0
@@ -445,7 +451,6 @@ func play():
 		
 	for i in range(_sizeX*_sizeY):
 		selectedTiles[i] = [-1,-1,null]
-	print("maxRuneProbability : ",stats.maxRuneProbability)
 	for i in range(_sizeY):
 		for s in range (_sizeX):
 			var dup = tile.instance()
@@ -493,11 +498,12 @@ func notInSelected(x, y):
 
 func clearSelected():
 	if PLAY != true:
-		return
+		return	
 	for i in range(0,selectedTileCnt):
 		if selectedTiles[i] != [-1,-1,null]:
 			selectedTiles[i][2].set_pressed(false)
 		selectedTiles[i] = [-1,-1,null]
+	currentBonus = 1
 	selectedTileCnt=0
 	createdWord = ""
 	selectedTileCnt = 0
@@ -516,6 +522,8 @@ func _on_tile_pressed(btn, x, y):
 		selectedTileCnt += 1
 		createdWord = createdWord + txt
 		crtWdNode.set_text(createdWord)
+		if btn.isVisible():
+			currentBonus += 1
 	elif (lastTile[0] == x) && (lastTile[1] == y):
 		btn.set_pressed(true)
 		var wordExists = checkWord(createdWord)
@@ -527,8 +535,8 @@ func _on_tile_pressed(btn, x, y):
 			lstWdNode.set_text(createdWord)
 			var mult = ((createdWord.length()-3)*10)
 			if mult == 0:
-				mult = 1				
-			score += selectedTileCnt*mult
+				mult = 1
+			score += selectedTileCnt*mult*currentBonus
 			scoreNode.set_text(str(score))
 			if createdWord.length() > longestWord.length():
 				longestWord = createdWord
@@ -604,14 +612,27 @@ func destroyAndFall():
 		var rng = range(0,lowestOrderedPerX[x][_HIGHEST]+1)
 		rng.invert()
 		for y in rng:
-			c = rcsvGetLetterAbove(x,y)
+			transferBonus = false
+			c = rcsvGetLetterAbove(x,y)			
 			var gidx = y*_sizeX+x
 			grid[gidx].set_pos(Vector2(x*_tileSize+_startX,rcsvY))
+			if transferBonus:
+				grid[gidx].setVisible(true)
+			else:
+				grid[gidx].setVisible(false)
 			if c == "":
+				setBonus(grid[gidx])
 				c = chooseRune()
 			grid[gidx].set_text(c)
 	# FALL
 	get_node("fallingTimer").connect("timeout", self, "timedFalling")	
+
+func setBonus(btn):
+	var rnb = randi()%100
+	if rnb <= _bonusChance:
+		btn.setVisible(true)
+	else:
+		btn.setVisible(false)
 				
 func timedFalling():
 	var stillFalling = true
@@ -620,7 +641,7 @@ func timedFalling():
 			var gidx = y*_sizeX+x
 			var tY = y*_tileSize
 			var pos = grid[gidx].get_pos()
-			if pos.y != tY:
+			if pos.y < tY:
 				pos.y += _fallingSpeed
 				grid[gidx].set_pos(Vector2(pos.x,pos.y))
 				stillFalling = true
@@ -635,6 +656,9 @@ func rcsvGetLetterAbove(x,y):
 	var cnt = grid[idx].get_text()
 	if cnt != "":
 		rcsvY = y*_tileSize
+		if grid[idx].isVisible():
+			transferBonus = true
+			grid[idx].setVisible(false)
 		grid[idx].set_text("")
 		return cnt
 	else:
