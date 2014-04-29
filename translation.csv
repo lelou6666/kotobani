@@ -14,16 +14,16 @@ FINALSCORE,final score,Endpunkte,score final
 CONTINUE,CONTINUE,WEITER,CONTINUER
 DIFFICULTY1,HARD,SCHWIERIG,DIFFICILE
 DIFFICULTY0,EASY,EINFACH,FACILE
-description_mode_0,The timer will be reset and slightly increased when you reach a new level.,Der Timer wird am Anfang jeder Stufe zurückgesetzt und verlängert.,Le compte a rebours est reinitialisé et augmenté à chaque fois qu'un nouveau niveau est atteind.
+description_mode_0,The timer will be reset and slightly increased when you reach a new level. By how much the time will be increased depends on the difficulty setting.,Der Timer wird am Anfang jeder Stufe zurückgesetzt und je nach Schwierigkeit verlängert.,Le compte à rebours est reinitialisé et augmenté selon la difficulté à chaque niveau.
 description_mode_1,You have XXXX seconds to find the next word.,Sie haven XXXX Sekunden um das nächste Wort zu finden.,Vous avez XXXX secondes pour trouver le prochain mot.
-description_mode_2,No time limit. The difficulty setting doesn't anything in that mode.,Kein Zeit Limit. Die Schwierigkeitseinstellung ändert nichts.,Aucune limite de temps. L'option de difficulté n'a aucune influence dans ce mode de jeu.
+description_mode_2,"No time limit, find words at your own pace. The difficulty setting doesn't do anything in that mode.",Kein Zeit Limit. Die Schwierigkeitseinstellung ändert nichts.,Aucune limite de temps. L'option de difficulté n'a aucune influence dans ce mode de jeu.
 MUSICON,MUSIC ON,MUSIK AN,MUSIQUES
 MUSICOFF,MUSIC OFF,MUSIK AUS,PAS DE MUSIQUES
 SOUNDON,SFX ON,GERÄUSCHE AN,SONS
 SOUNDOFF,SFX OFF,GERÄUSCHE AUS,PAS DE SONS
 BACK,BACK,ZURÜCK,RETOUR
 LOCALE,ENGLISH,DEUTSCH,FRANÇAIS
-MODE0,MODE 1,MODUS 1,MODE 1
-MODE1,MODE 2,MODUS 2,MODE 2
+MODE0,TIMED LEVEL,TIMER PRO STUFE,TEMPS PAR NIVEAU
+MODE1,TIMED WORD,TIMER PRO WORT,TEMPS PAR MOT
 MODE2,RELAXED,ENTSPANNT,RELAXÉ
-HELPTEXT,Create words by clicking on adjacent tiles. Words must be composed of at least 3 letters. Doubleclick on the last letter to validate your word.,Stelen Sie Wörter her indem Sie auf benachbachte Buchstaben klicken. Die Wörter müssen aus mindestens 3 Buchstaben bestehen. Doppelklicken Sie auf den letzten Buchstaben um Ihre Auswahl zu validieren.,Créez des mots d'au moins 3 lettres en cliquant sur des cases adjacentes. Cliquez deux fois sur la derniere case pour valider votre entrée.
+HELPTEXT,Create words by clicking on adjacent tiles. Words must be composed of at least 3 letters. Doubleclick on the last letter to validate your word.,Stellen Sie Wörter her indem Sie auf benachbachte Buchstaben klicken. Die Wörter müssen aus mindestens 3 Buchstaben bestehen. Doppelklicken Sie auf den letzten Buchstaben um Ihre Auswahl zu validieren.,Créez des mots d'au moins 3 lettres en cliquant sur des cases adjacentes. Cliquez deux fois sur la derniere case pour valider votre entrée.

@@ -16,7 +16,7 @@
 
 extends Node2D
 
-const _VERSION = "beta_2.1"
+const _VERSION = "1.1.0"
 const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
@@ -25,6 +25,7 @@ const _sizeX = 16
 const _sizeY = 12
 const _tileSize = 50
 const _halfTileSize = 25
+const _fallingSpeed = 5
 const _HIGHEST = 999999
 
 const _localeCount = 3
@@ -68,12 +69,14 @@ var longestWord = ""
 var level = 1
 var nextLevelAt = 200
 var oldLevelAt = 0
+var fallingX = []
 
 var gameMode = 0
 var gameDifficulty = 0
 var highScore = [[0,0],[0,0],[0,0]]
 
 var lowestOrderedPerX = []
+var rcsvY = -1
 
 var options = null
 
@@ -336,8 +339,11 @@ func _ready():
 	options.locale = locale[options.localeIdx]
 	currentLocale = options.localeIdx
 	if (options.highScore) != null  && (options.highScore.size() == highScore.size()):
-		highScore = options.highScore
-		
+		for h in range(0,3):
+			for s in range(0,2):
+				highScore[h][s] = options.highScore[h][s]
+
+
 	if options.sfx != null:
 		soundToggle = options.sfx
 		
@@ -587,28 +593,48 @@ func destroyAndFall():
 			lowestOrderedPerX[x][500]=selectedTiles[i]
 		if y > highest:
 			lowestOrderedPerX[x][_HIGHEST] = y
-	# FALL
+	# MOVEUP
 	var c = ""
 	var rrange = []
 	for x in range(0,_sizeX):
 		if lowestOrderedPerX[x].empty():
 			continue
+		fallingX.append(x)
 		c = ""
 		var rng = range(0,lowestOrderedPerX[x][_HIGHEST]+1)
 		rng.invert()
 		for y in rng:
 			c = rcsvGetLetterAbove(x,y)
+			var gidx = y*_sizeX+x
+			grid[gidx].set_pos(Vector2(x*_tileSize+_startX,rcsvY))
 			if c == "":
 				c = chooseRune()
-			grid[y*_sizeX+x].set_text(c)
-			
-		
+			grid[gidx].set_text(c)
+	# FALL
+	get_node("fallingTimer").connect("timeout", self, "timedFalling")	
+				
+func timedFalling():
+	var stillFalling = true
+	for x in fallingX:
+		for y in range(0,_sizeY):
+			var gidx = y*_sizeX+x
+			var tY = y*_tileSize
+			var pos = grid[gidx].get_pos()
+			if pos.y != tY:
+				pos.y += _fallingSpeed
+				grid[gidx].set_pos(Vector2(pos.x,pos.y))
+				stillFalling = true
+	if ! stillFalling:
+		fallingX.clear()
+		get_node("fallingTimer").disconnect("timeout", self, "timedFalling")
+
 func rcsvGetLetterAbove(x,y):
 	if PLAY != true:
-		return
+		return ""
 	var idx = y*_sizeX+x
 	var cnt = grid[idx].get_text()
 	if cnt != "":
+		rcsvY = y*_tileSize
 		grid[idx].set_text("")
 		return cnt
 	else:
