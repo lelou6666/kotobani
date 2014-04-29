@@ -16,7 +16,7 @@
 
 extends Node2D
 
-const _VERSION = "1.1.0"
+const _VERSION = "1.1.1"
 const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
@@ -25,7 +25,7 @@ const _sizeX = 16
 const _sizeY = 12
 const _tileSize = 50
 const _halfTileSize = 25
-const _fallingSpeed = 5
+const _fallingSpeed = 10
 const _HIGHEST = 999999
 const _bonusChance = 1
 const _bonusMult = 2
@@ -37,6 +37,7 @@ var currentLocale = 0
 var initialTimer = [[60*2,30],[60,15],[-1,-1]]
 
 var PLAY = false
+var FALLING = false
 var grid = []
 var stars = []
 var literalBool = {false:"false",true:"true"}
@@ -55,7 +56,7 @@ var progressionBar = null
 var keyPressed = false
 
 var soundToggle = 1
-var musicToggle = 1
+var musicToggle = 2
 var doNotRestartMusic = false
 
 var gameTimer = null
@@ -118,6 +119,8 @@ func preventKeyRepeat():
 	get_node("keyTimer").start()
 		
 func _input(e):
+	if keyPressed:
+		return
 	if e.is_action("clear_selected"):
 		if PLAY != true:
 			return
@@ -127,10 +130,10 @@ func _input(e):
 		clearSelected()
 		selectedTileCnt = 0		
 		return
-	if e.is_action("music"):
+	elif e.is_action("music"):
 		preventKeyRepeat()
 		toggleMusic()
-	if e.is_action("sound"):
+	elif e.is_action("sound"):
 		preventKeyRepeat()
 		toggleSound()
 	elif e.is_action("escape"):
@@ -138,11 +141,11 @@ func _input(e):
 		if PLAY == true:
 			PLAY = false
 			gameTimer.stop()
-			freeGrid()
 			if gameMode == 2:
 				PLAY = true
 				gameOver()
 			else:
+				freeGrid()
 				titleMenu()
 	elif e.is_action("pause"):
 		preventKeyRepeat()
@@ -178,8 +181,8 @@ func options():
 
 func freeGrid():
 	for i in range(_sizeX*_sizeY):
-		grid[i].remove_and_skip()
-		stars[i].remove_and_skip()
+		remove_and_delete_child(grid[i])
+		remove_and_delete_child(stars[i])
 
 func fireworks(on):
 	for i in range(1,9):
@@ -238,10 +241,7 @@ func setTranslations():
 	get_node("score-label").set_text(TranslationServer.translate("SCORE"))
 	get_node("level-label").set_text(TranslationServer.translate("LEVEL"))
 
-	if musicToggle:
-		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICON"))
-	else:
-		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICOFF"))
+	get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSIC"+str(musicToggle)))
 	if soundToggle:
 		get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUNDON"))
 	else:
@@ -276,25 +276,28 @@ func setTranslations():
 	get_node("pause/continueBtn").set_text(TranslationServer.translate("CONTINUE"))
 
 func toggleMusic():
-	musicToggle ^= 1
-	if musicToggle:
-		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICON"))
-	else:
-		get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSICOFF"))
-	if ! musicToggle:
+	musicToggle += 1
+	musicToggle %= 3
+	get_node("options/grid/musicBtn").set_text(TranslationServer.translate("MUSIC"+str(musicToggle)))
+	if musicToggle == 0:
 		get_node("streamTitle").stop()
 		get_node("streamGameOver").stop()
 		get_node("streamGameOn").stop()
+		get_node("options/grid/musicBtn").set_pressed(false)
 	else:
 		get_node("streamGameOver").stop()
+		get_node("options/grid/musicBtn").set_pressed(true)
 		if PLAY==1:
-			get_node("streamTitle").stop()
-			get_node("streamGameOn").play()
+			if musicToggle == 1:
+				get_node("streamTitle").play()
+				get_node("streamGameOn").stop()
+			else:
+				get_node("streamTitle").stop()
+				get_node("streamGameOn").play()
 		else:
-			get_node("streamTitle").play()
-			get_node("streamGameOn").stop()
-		
-	get_node("options/grid/musicBtn").set_pressed(musicToggle)
+			if musicToggle == 1:
+				get_node("streamTitle").play()
+				get_node("streamGameOn").stop()
 	storeOptions()
 
 func toggleSound():
@@ -365,7 +368,7 @@ func _ready():
 	TranslationServer.set_locale(options.locale)
 	setTranslations()
 
-	if ! musicToggle:
+	if musicToggle == 0:
 		get_node("streamTitle").stop()
 		get_node("streamGameOver").stop()
 		get_node("streamGameOn").stop()
@@ -472,10 +475,14 @@ func play():
 		stars[i].raise()
 		
 	set_process_input(true)
-	if musicToggle:
-		get_node("streamTitle").stop()
+	if musicToggle > 0:
 		get_node("streamGameOver").stop()
-		get_node("streamGameOn").play()
+		if musicToggle == 1:
+			get_node("streamGameOn").stop()
+			get_node("streamTitle").play()		
+		else:
+			get_node("streamGameOn").play()
+			get_node("streamTitle").stop()
 		
 func chooseRune():
 	if PLAY != true:
@@ -541,25 +548,7 @@ func _on_tile_pressed(btn, x, y):
 			if createdWord.length() > longestWord.length():
 				longestWord = createdWord
 				lgWdNode.set_text(longestWord)
-			destroyAndFall()
-			clearSelected()
-			if	gameMode == 1:
-					timer = initialTimer[gameMode][gameDifficulty]
-			if score >= nextLevelAt:
-				gameTimer.stop()
-				level = level + 1
-				oldLevelAt = nextLevelAt
-				nextLevelAt = nextLevelAt+(level * 100)				
-				get_node("levelWord").set_text(str(level))
-				if soundToggle:
-					sfxNode.play("levelup", false)
-				if gameMode == 0:					
-					timer = (60/(1+gameDifficulty))+ceil(60.0*(float(level)/((gameDifficulty+1)*2.0)))
-				rebuildGrid()
-				if gameMode != 2:
-					gameTimer.start()
-			progressionBar.setProgression(score-oldLevelAt, nextLevelAt-oldLevelAt)
-			
+			destroyAndFall()			
 	else:
 		clearSelected()
 		print("CLEARED")
@@ -568,7 +557,25 @@ func _on_tile_pressed(btn, x, y):
 		selectedTileCnt = 1
 		createdWord = txt
 		crtWdNode.set_text(createdWord)
-		
+	
+func wordFoundPart2():
+	clearSelected()
+	if	gameMode == 1:
+			timer = initialTimer[gameMode][gameDifficulty]
+	if score >= nextLevelAt:
+		gameTimer.stop()
+		level = level + 1
+		oldLevelAt = nextLevelAt
+		nextLevelAt = nextLevelAt+(level * 100)				
+		get_node("levelWord").set_text(str(level))
+		if soundToggle:
+			sfxNode.play("levelup", false)
+		if gameMode == 0:					
+			timer = (60/(1+gameDifficulty))+ceil(60.0*(float(level)/((gameDifficulty+1)*2.0)))
+		rebuildGrid()
+		if gameMode != 2:
+			gameTimer.start()
+	progressionBar.setProgression(score-oldLevelAt, nextLevelAt-oldLevelAt)
 		
 func destroyAndFall():
 	if PLAY != true:
@@ -615,6 +622,8 @@ func destroyAndFall():
 			transferBonus = false
 			c = rcsvGetLetterAbove(x,y)			
 			var gidx = y*_sizeX+x
+			if y == 0:
+				rcsvY = -_tileSize
 			grid[gidx].set_pos(Vector2(x*_tileSize+_startX,rcsvY))
 			if transferBonus:
 				grid[gidx].setVisible(true)
@@ -625,6 +634,7 @@ func destroyAndFall():
 				c = chooseRune()
 			grid[gidx].set_text(c)
 	# FALL
+	FALLING = true
 	get_node("fallingTimer").connect("timeout", self, "timedFalling")	
 
 func setBonus(btn):
@@ -635,7 +645,7 @@ func setBonus(btn):
 		btn.setVisible(false)
 				
 func timedFalling():
-	var stillFalling = true
+	var stillFalling = false
 	for x in fallingX:
 		for y in range(0,_sizeY):
 			var gidx = y*_sizeX+x
@@ -645,9 +655,15 @@ func timedFalling():
 				pos.y += _fallingSpeed
 				grid[gidx].set_pos(Vector2(pos.x,pos.y))
 				stillFalling = true
-	if ! stillFalling:
+	if ! stillFalling:	
+		lowestOrderedPerX.clear()
+		lowestOrderedPerX.resize(_sizeX)
+		for i in range(0,_sizeX):
+			lowestOrderedPerX[i] = {}		
 		fallingX.clear()
 		get_node("fallingTimer").disconnect("timeout", self, "timedFalling")
+		FALLING = false
+		wordFoundPart2()
 
 func rcsvGetLetterAbove(x,y):
 	if PLAY != true:
@@ -664,6 +680,7 @@ func rcsvGetLetterAbove(x,y):
 	else:
 		y = y -1
 		if y < 0:
+			rcsvY = -_tileSize
 			return ""
 		else:
 			return rcsvGetLetterAbove(x,y)
