@@ -41,6 +41,11 @@ let me know if you want others. The Dictionaries are extracted from the aspell r
 
 CHANGELOG:
 ----------
+1.1.2:
+* fixed the crash (I was using the wrong method to exit the game)
+* the frog animation is only executed when the pause screen is visible
+* increased the difficulty for en_US players as it was WAY too easy for them
+
 1.1.1:
 * fixed the tile disappearing bug
 * added the choice to keep the intro music while playing instead of the Dirge
