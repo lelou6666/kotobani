@@ -16,7 +16,7 @@
 
 extends Node2D
 
-const _VERSION = "1.1.1b"
+const _VERSION = "1.1.2"
 const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
@@ -35,6 +35,9 @@ const locale = ["en_US","de_DE","fr_FR"]
 
 var currentLocale = 0
 var initialTimer = [[60*2,30],[60,15],[-1,-1]]
+# english is way too easy compared to other languages, so people playing in english get an extra penalty
+# the higher the number, the less time gets added after each level.
+var langMult = {"en_US":4,"de_DE":1,"fr_FR":1}
 
 var PLAY = false
 var FALLING = false
@@ -164,14 +167,16 @@ func rebuildGrid():
 			setBonus(grid[gidx])
 
 func pause():
-	PLAY = false
+	PLAY = false	
 	gameTimer.stop()
-	setScene("pause")	
+	setScene("pause")
+	get_node("pause").startFrog()
 
 func unpause():
 	PLAY = true
 	if gameMode != 2:
 		gameTimer.start()
+	get_node("pause").stopFrog()
 	setScene("game")
 	
 func options():
@@ -227,7 +232,8 @@ func _time_out():
 		gameOver()
 	
 func getOut():
-	self.remove_and_skip()
+	get_scene().quit()
+	#self.remove_and_skip()
 
 func setTranslations():
 	print(options.locale)
@@ -305,8 +311,7 @@ func toggleSound():
 		get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUNDON"))
 	else:
 		get_node("options/grid/soundBtn").set_text(TranslationServer.translate("SOUNDOFF"))	
-
-		storeOptions()
+	storeOptions()
 
 func toggleGameMode():
 	gameMode = (gameMode+1) % 3
@@ -548,7 +553,6 @@ func _on_tile_pressed(btn, x, y):
 			destroyAndFall()			
 	else:
 		clearSelected()
-		print("CLEARED")
 		lastTile = [x,y]
 		selectedTiles[selectedTileCnt]=[x,y,btn]
 		selectedTileCnt = 1
@@ -563,12 +567,13 @@ func wordFoundPart2():
 		gameTimer.stop()
 		level = level + 1
 		oldLevelAt = nextLevelAt
-		nextLevelAt = nextLevelAt+(level * 100)				
+		nextLevelAt = nextLevelAt+(level * 150)				
 		get_node("levelWord").set_text(str(level))
 		if soundToggle:
 			sfxNode.play("levelup", false)
-		if gameMode == 0:					
-			timer = (60/(1+gameDifficulty))+ceil(60.0*(float(level)/((gameDifficulty+1)*2.0)))
+		if gameMode == 0:
+			timer = (60/(1+gameDifficulty))+ceil(60.0*float(level)/float((gameDifficulty+1)*5*langMult[options.locale]))
+			print("time to reach ",nextLevelAt," points : ",timer,"seconds.")
 		rebuildGrid()
 		if gameMode != 2:
 			gameTimer.start()
