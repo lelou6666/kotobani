@@ -16,7 +16,7 @@
 
 extends Node2D
 
-const _VERSION = "1.1.2"
+const _VERSION = "1.1.3"
 const _COPYRIGHT = "\ncopyright 2014 Sammy Fischer\n(sammy@cosmic-bandito.com)\nLicensed under GPLv3"
 
 const _startX = 224
@@ -228,6 +228,7 @@ func _time_out():
 	var minutes = int(floor(timer/60))
 	timerNode.set_text(str(minutes)+":"+str(seconds).pad_zeros(2))
 	if timer < 0:
+		get_node("fallingTimer").stop()
 		gameTimer.stop()
 		gameOver()
 	
